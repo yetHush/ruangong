@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>权限管理</title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet"/>
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body class="pear-container">
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">权限名</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="rightName" placeholder="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">权限类型</label>
+                    <div class="layui-input-block">
+                        <select name="rightType" lay-search>
+                            <option value=""></option>
+                            <option value="USER_RIGHT">USER_RIGHT</option>
+<!--                            <option value="ROLE_RIGHT">ROLE_RIGHT</option>-->
+                            <option value="CATALOG_RIGHT">CATALOG_RIGHT</option>
+                            <option value="FILE_RIGHT">FILE_RIGHT</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item layui-inline">
+                    <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit name="right-query" id="right-query"
+                            lay-filter="right-query">
+                        <i class="layui-icon layui-icon-search"></i>
+                        查询
+                    </button>
+                    <button type="reset" class="pear-btn pear-btn-md">
+                        <i class="layui-icon layui-icon-refresh"></i>
+                        重置
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table id="right-table" lay-filter="right-table"></table>
+    </div>
+</div>
+
+<script type="text/html" id="right-toolbar">
+    <button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
+        <i class="layui-icon layui-icon-add-1"></i>
+        新增
+    </button>
+</script>
+
+<script type="text/html" id="right-bar">
+    <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>
+    </button>
+    <!--    <button class="pear-btn pear-btn-warming pear-btn-sm" lay-event="power"><i class="layui-icon layui-icon-vercode"></i></button>-->
+    <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i>
+    </button>
+</script>
+
+
+<script src="../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script src="../../lib/jquery-3.4.1/jquery-3.4.1.min.js" type="text/javascript"></script>
+<script>
+    layui.use(['table', 'form', 'constant', 'jquery', 'comn'], function () {
+        let table = layui.table;
+        let form = layui.form;
+        let $ = layui.jquery;
+        let constant = layui.constant;
+        let comn = layui.comn;
+        let MODULE_PATH = "";
+        let cols = [
+            [
+                // {type:'checkbox'},
+                // {title: '权限Id', field: 'rightId', align:'center' },
+                {title: '权限名', field: 'rightName', width: 150},
+                {title: '权限类型', field: 'rightType', width: 150},
+                {title: 'URL', field: 'rightUrl', width: 200},
+                {title: '创建者', field: 'createUser', width: 100},
+                {title: '创建时间', field: 'createTime', width: 180},
+                // {title: '备注', field: 'remark', align: 'center', width: 200},
+                {title: '操作', toolbar: '#right-bar', width: 150}
+            ]
+        ]
+
+        let user = comn.getUser()
+
+        table.render({
+            elem: '#right-table',
+            limit: 10,
+            // where: {
+            //     id: 1,
+            // },
+            headers: comn.getHeaders(),
+            limits: [10, 20, 40, 60, 80, 100, 200],
+            url: constant.backurl + 'right/getRights',
+            parseData: function (res) {
+                entity = comn.parseData(res);
+                if (entity == undefined || '' == entity || null == entity) {
+                    return {}
+                } else {
+                    return {
+                        "code": entity.code,
+                        "msg": entity.msg,
+                        "count": entity.entity.total,
+                        "data": entity.entity.list
+                    }
+                }
+            },
+            page: true,
+            cols: cols,
+            skin: 'line',
+            toolbar: '#right-toolbar',
+            defaultToolbar: [{
+                title: '刷新',
+                layEvent: 'refresh',
+                icon: 'layui-icon-refresh',
+            }, 'filter', 'print', 'exports']
+        });
+
+        //查询监听按钮
+        form.on('submit(right-query)', function (data) {
+            table.reload('right-table', {
+                url: constant.backurl + 'right/getRights',
+                where: data.field,
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+            })
+            return false;
+        });
+
+        table.on('tool(right-table)', function (obj) {
+            if (obj.event === 'remove') {
+                window.remove(obj);
+            } else if (obj.event === 'edit') {
+                window.edit(obj);
+            }
+        });
+
+        table.on('toolbar(right-table)', function (obj) {
+            if (obj.event === 'add') {
+                window.add();
+            } else if (obj.event === 'refresh') {
+                window.refresh();
+            }
+        });
+
+        window.add = function () {
+            layer.open({
+                type: 2,
+                title: '新增',
+                shade: 0.1,
+                maxmin: true,
+                area: [comn.isModile() ? '100%' : '500px', comn.isModile() ? '100%' : '400px'],
+                content: '/pages/right/add.html'
+            })
+            ;
+        }
+
+        // window.power = function (obj) {
+        //     layer.open({
+        //         type: 2,
+        //         title: '授权',
+        //         shade: 0.1,
+        //         area: ['320px', '400px'],
+        //         // content: MODULE_PATH + 'edit.html'
+        //         content: '/pages/right/edit.html'
+        //     });
+        // }
+
+        window.edit = function (obj) {
+            var data = obj.data;
+            layer.open({
+                type: 2,
+                title: '修改',
+                shade: 0.1,
+                maxmin: true,
+                area: [comn.isModile() ? '100%' : '500px', comn.isModile() ? '100%' : '400px'],
+                content: '/pages/right/edit.html',
+                success: function (layero, index) {
+                    // var body = layer.getChildFrame('body', index);
+                    var iframe = window['layui-layer-iframe' + index];
+                    iframe.setParentData(data)
+                }
+            });
+        }
+
+
+        window.remove = function (data) {
+            var delete_index = layer.confirm("是否删除该权限？", {
+                    btn: ['确认', '取消'], cancel: function () {
+                        parent.layer.close(delete_index);//关闭窗口
+                    }
+                },
+                function () {
+                    // let loading = layer.load();
+                    let myData = {"rightId": data.data.rightId, "updateUser": user.userNum};
+                    let myJson = JSON.stringify(myData);
+                    comn.post(constant.backurl + 'right/delete', myJson, null, function () {
+                        table.reload("right-table", {
+                            url: constant.backurl + 'right/getRights'
+                        });
+                    }, function () {
+                        parent.layer.close(delete_index);//关闭窗口
+                    });
+                }, function () {
+                    parent.layer.close(delete_index);//关闭窗口
+                }
+            )
+        }
+
+        // window.batchRemove = function(obj){
+        //     let data = table.checkStatus(obj.config.id).data;
+        //     if(data.length === 0){
+        //         layer.msg("未选中数据",{icon:3,time:1000});
+        //         return false;
+        //     }
+        //     let ids = "";
+        //     for(let i = 0;i<data.length;i++){
+        //         ids += data[i].userId+",";
+        //     }
+        //     ids = ids.substr(0,ids.length-1);
+        //     layer.confirm('确定要删除这些权限', {icon: 3, title:'提示'}, function(index){
+        //         layer.close(index);
+        //         let loading = layer.load();
+        // data.field.status=3;
+        // data=JSON.stringify(data);
+        // console.log("data"+data);
+        // comn.get(constant.backurl + 'right/delete', data);
+        // $.ajax({
+        //     url: MODULE_PATH+"batchRemove/"+ids,
+        //     dataType:'json',
+        //     type:'delete',
+        //     success:function(result){
+        //         layer.close(loading);
+        //         if(result.success){
+        //             layer.msg(result.msg,{icon:1,time:1000},function(){
+        //                 table.reload('right-table');
+        //             });
+        //         }else{
+        //             layer.msg(result.msg,{icon:2,time:1000});
+        //         }
+        //     }
+        // })
+        // });
+        // }
+
+        window.refresh = function () {
+            table.reload('right-table');
+        }
+    })
+</script>
+</body>
+</html>

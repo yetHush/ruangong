@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>权限列表</title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet"/>
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+
+<div class="layuimini-container">
+    <div class="layuimini-main">
+
+        <table class="layui-hide" id="right-table" lay-filter="right-table">
+            <!-- 数据渲染区  -->
+        </table>
+
+        <script type="text/html" id="choose">
+            <a class="layui-btn layui-btn-xs" lay-event="select">选择</a>
+        </script>
+
+    </div>
+</div>
+
+<script src="../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    let rightType = null;
+
+    window.setRightType = function (obj) {
+        rightType = obj;
+    }
+    //从layui 2.6 开始，第一个参数不传即代表加载所有内置模块）
+    layui.use(['form', 'layer', 'laypage', 'constant', 'comn', 'table', 'jquery'], function () {
+        let layer = layui.layer, //弹层
+            form = layui.form,
+            laypage = layui.laypage, //分页
+            table = layui.table, //表格
+            $ = layui.jquery,
+            constant = layui.constant,
+            comn = layui.comn,
+            MODULE_PATH = "",
+            cols = [[
+                {title: '权限名称', field: 'rightName', width: 150},
+                {title: '权限类型', field: 'rightType', width: 150},
+                {title: 'URL', field: 'rightUrl', width: 200},
+                // {title: '创建者', field: 'createUser', align: 'center'},
+                {fixed: 'right', title: '', toolbar: '#choose', width: 70}
+            ]]
+
+        table.render({
+            elem: '#right-table',
+            limit: 10,
+            headers: comn.getHeaders(),
+            limits: [10, 20, 40, 60, 80, 100, 200],
+            url: constant.backurl + 'right/getRights',
+            where: {rightType: rightType},
+            parseData: function (res) {
+                entity = comn.parseData(res);
+                if (entity == undefined || '' == entity || null == entity) {
+                    return {}
+                } else {
+                    return {
+                        "code": entity.code,
+                        "msg": entity.msg,
+                        "count": entity.entity.total,
+                        "data": entity.entity.list
+                    }
+                }
+            },
+            page: true,
+            cols: cols,
+            skin: 'line'
+        });
+
+        table.on('tool(right-table)', function (obj) {
+            var parent$ = window.parent.layui.jquery;
+//为父页面某个#id赋值
+//       parent$("#id").val("xxxx");
+            var data = obj.data;
+            switch (obj.event) {
+                case 'select':
+                    parent$("#choose-right").val(data.rightName);
+                    // parent$("#choose-right").field = (data.rightId);
+                    window.parent.document.getElementById("choose-right").field = data.rightId;
+                    var index = parent.layer.getFrameIndex(window.name);
+                    parent.layer.close(index);
+                    break;
+            }
+        })
+
+    })
+</script>
+</body>
+</html>

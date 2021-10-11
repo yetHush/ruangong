@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户绑定目录权限</title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<form class="layui-form" lay-filter="right-info" action="">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="main-container">
+                <div class="layui-form-item">
+                    <label class="layui-form-label required">用户名</label>
+                    <div class="layui-input-block">
+                        <input id="choose-user" layfilter="choose-user" type="text" name="userId" lay-verify="required"
+                               lay-reqtext="用户名不能为空" autocomplete="off" placeholder="点击选择" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">目录名</label>
+                    <div class="layui-input-block">
+                        <input name="parentCatalogId" autocomplete="off" class="layui-input" lay-filter="ptree"
+                               id="ptree">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label required">权限名</label>
+                    <div class="layui-input-block"  id="checkBox">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script src="../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../../js/lay-config.js?v=2.0.0" charset="utf-8"></script>
+<script>
+    layui.use(['treeSelect', 'table', 'form', 'jquery', 'constant', 'comn', 'checkbox'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+        let constant = layui.constant;
+        let table = layui.table;
+        let comn = layui.comn;
+        let treeSelect = layui.treeSelect;
+        let checkbox = layui.checkbox;
+
+        let user = comn.getUser()
+        $('#choose-user').focus(choose_user);
+
+        function choose_user(data) {
+            var index = layer.open({
+                title: '选择用户',
+                type: 2,
+                shade: 0.2,
+                maxmin: true,
+                shadeClose: true,
+                area: ['90%', '80%'],
+                content: '/pages/user/user_info.html',
+                end: function () {
+                    form.render('select');
+                }
+            });
+        }
+
+        $('#choose-user').change(function (data) {
+            let userId = document.getElementById("choose-user").field;
+            let dto = {
+                'userId': userId,
+                'catalogId': document.getElementById("ptree").field
+            }
+            comn.post(constant.backurl + 'user/catalog/right/getCatalogRights4CheckBox', JSON.stringify(dto), null, function (entity) {
+                checkbox({
+                    elem: "#checkBox"
+                    , showDel: false
+                    , showType: false
+                    , clear: true
+                    , nodes: entity
+                    , click: function (node) {
+                        if (node.on) {
+                            window.bind(node.rightId);
+                        } else {
+                            window.unbind(node.rightId);
+                        }
+                    }
+                    , del: function (node) {
+                        console.log("删除", node);
+                        return true;
+                    }
+                });
+            })
+        });
+
+        $('#ptree').change(function (data) {
+            let userId = document.getElementById("choose-user").field;
+            let dto = {
+                'userId': userId,
+                'catalogId': document.getElementById("ptree").field
+            }
+            comn.post(constant.backurl + 'user/catalog/right/getCatalogRights4CheckBox', JSON.stringify(dto), null, function (entity) {
+                checkbox({
+                    elem: "#checkBox"
+                    , showDel: false
+                    , showType: false
+                    , clear: true
+                    , nodes: entity
+                    , click: function (node) {
+                        if (node.on) {
+                            window.bind(node.rightId);
+                        } else {
+                            window.unbind(node.rightId);
+                        }
+                    }
+                    , del: function (node) {
+                        console.log("删除", node);
+                        return true;
+                    }
+                });
+            })
+        });
+
+
+        form.render(); //更新全部
+        treeSelect.render({
+            elem: '#ptree',
+            data: constant.backurl + 'catalog/getCatalogTree',
+            type: 'GET',
+            headers: comn.getHeaders(),
+            placeholder: '点击选择父目录',
+            style: {
+                folder: {
+                    enable: true
+                },
+                line: {
+                    enable: true
+                }
+            },
+            parseData: comn.parseData,
+            click: function (obj) {
+                document.getElementById("ptree").field = obj.current.id;
+                let completePath = obj.current.completePath;
+                // console.log(completePath)
+                $('#' + obj.inputId).val(completePath);
+                $('#ptree').change();
+            },
+            // 加载完成后的回调函数
+            success: function (d) {
+                // console.log(d)
+            }
+        });
+        form.on('submit(reset)', function () {
+            form.val("right-info", {
+                "catalogId": null,
+                "userId": null,
+                "rightId": null,
+                // "remark": null,
+            });
+            document.getElementById("ptree").field = null
+            treeSelect.revokeNode('ptree', function (d) {
+                // console.log(d);
+                // console.log(d.treeId);
+            })
+        });
+
+        //监听提交
+        window.bind = function (rightId) {
+            let userId = document.getElementById("choose-user").field;
+            let dto = {
+                "rightId": rightId,
+                // "remark": data.remark,
+                "createUser": user.userNum,
+                "userId": userId,
+                "catalogId": document.getElementById("ptree").field,
+            }
+            comn.post(constant.backurl + 'user/catalog/right/bind', JSON.stringify(dto))
+
+            return false;
+        }
+        window.unbind = function (rightId) {
+            let userId = document.getElementById("choose-user").field;
+            let dto = {
+                'createUser': user.userNum,
+                'userId': userId,
+                'rightId': rightId,
+                "catalogId": document.getElementById("ptree").field,
+            }
+            // data.field.createTime = new Date();
+            comn.post(constant.backurl + 'user/catalog/right/unbind', JSON.stringify(dto))
+            return false;
+        }
+    })
+</script>
+
+<script>
+</script>
+</body>
+</html>

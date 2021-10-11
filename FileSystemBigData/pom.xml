@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>bigdata.filesystem</groupId>
+    <artifactId>FileSystemBigData</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.2.5.RELEASE</version>
+    </parent>
+    <!--分别设置仿真，测试，生产环境 -->
+    <profiles>
+        <!-- 仿真环境 -->
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <environment>dev</environment>
+            </properties>
+        </profile>
+        <!-- 测试环境 -->
+        <profile>
+            <id>test</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <environment>test</environment>
+            </properties>
+        </profile>
+        <!-- 生产环境 -->
+        <profile>
+            <id>prod</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <environment>prod</environment>
+            </properties>
+        </profile>
+    </profiles>
+
+
+    <properties>
+        <java.version>1.8</java.version>
+        <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
+        <mybatis-spring-boot-starter.version>1.3.2</mybatis-spring-boot-starter.version>
+        <mapper-spring-boot-starter.version>2.1.5</mapper-spring-boot-starter.version>
+        <mysql-connector-java.version>8.0.19</mysql-connector-java.version>
+        <!--<mysql-connector-java.version>5.1.51</mysql-connector-java.version>-->
+        <jsr311-api.version>1.1.1</jsr311-api.version>
+        <jersey-servlet.version>1.19</jersey-servlet.version>
+        <lombok.version>1.18.12</lombok.version>
+        <commons-lang3.version>3.9</commons-lang3.version>
+        <pagehelper-spring-boot-starter.version>1.2.5</pagehelper-spring-boot-starter.version>
+        <fastjson.version>1.2.72</fastjson.version>
+        <jwt.version>3.4.0</jwt.version>
+        <novelweb.tool-core.version>1.3.3</novelweb.tool-core.version>
+        <commons-fileupload.version>1.4</commons-fileupload.version>
+        <hibernate-validator.version>6.0.18.Final</hibernate-validator.version>
+        <swagger2.version>2.9.2</swagger2.version>
+        <common-util.version>2.0.2</common-util.version>
+        <jackson.version>2.11.2</jackson.version>
+        <tika.version>1.27</tika.version>
+        <tess4j.version>4.5.3</tess4j.version>
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <elasticsearch.version>7.12.0</elasticsearch.version>
+        <useragentutils.version>1.21</useragentutils.version>
+        <spire.office.free.version>3.9.0</spire.office.free.version>
+        <poi.version>4.1.2</poi.version>
+        <swagger2markup.maven.plugin.version>1.3.7</swagger2markup.maven.plugin.version>
+        <asciidoctor.maven.plugin.version>2.2.1</asciidoctor.maven.plugin.version>
+        <asciidoctorj.pdf.version>1.6.0</asciidoctorj.pdf.version>
+        <asciidoctorj.version>2.5.1</asciidoctorj.version>
+        <jruby.version>9.2.17.0</jruby.version>
+        <fr.opensagres.xdocreport.document.version>2.0.1</fr.opensagres.xdocreport.document.version>
+        <fr.opensagres.poi.xwpf.converter.xhtml.version>2.0.1</fr.opensagres.poi.xwpf.converter.xhtml.version>
+<!--        <org.apache.poi.xwpf.converter.xhtml.version>1.0.6</org.apache.poi.xwpf.converter.xhtml.version>-->
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hibernate.validator</groupId>
+                    <artifactId>hibernate-validator</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-freemarker</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.elasticsearch</groupId>-->
+<!--            <artifactId>elasticsearch</artifactId>-->
+<!--            <version>${elasticsearch.version}</version>-->
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.elasticsearch.client</groupId>-->
+<!--            <artifactId>elasticsearch-rest-client</artifactId>-->
+<!--            <version>${elasticsearch.version}</version>-->
+<!--        </dependency>-->
+        <!-- Java High Level REST Client -->
+<!--        <dependency>-->
+<!--            <groupId>org.elasticsearch.client</groupId>-->
+<!--            <artifactId>elasticsearch-rest-high-level-client</artifactId>-->
+<!--            <version>${elasticsearch.version}</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>${mybatis-spring-boot-starter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>tk.mybatis</groupId>
+            <artifactId>mapper-spring-boot-starter</artifactId>
+            <version>${mapper-spring-boot-starter.version}</version>
+        </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>mysql</groupId>-->
+<!--            <artifactId>mysql-connector-java</artifactId>-->
+<!--            <version>${mysql-connector-java.version}</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.dm</groupId>-->
+<!--            <artifactId>DmJdbcDriver18</artifactId>-->
+<!--            <version>1.8</version>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${project.basedir}/src/lib/dm/DmJdbcDriver18.jar</systemPath>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>jsr311-api</artifactId>
+            <version>${jsr311-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-servlet</artifactId>
+            <version>${jersey-servlet.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>${fastjson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>${jwt.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.github.shalousun/common-util -->
+        <dependency>
+            <groupId>com.github.shalousun</groupId>
+            <artifactId>common-util</artifactId>
+            <version>${common-util.version}</version>
+        </dependency>
+        <!--断点续传依赖-->
+        <dependency>
+            <groupId>cn.novelweb</groupId>
+            <artifactId>tool-core</artifactId>
+            <version>${novelweb.tool-core.version}</version>
+        </dependency>
+        <!-- 分页插件 -->
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+            <version>${pagehelper-spring-boot-starter.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mybatis</groupId>
+                    <artifactId>mybatis</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>${commons-fileupload.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>${hibernate-validator.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <!-- 单元测试依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>${swagger2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>${swagger2.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-parsers -->
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>${tika.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-parsers</artifactId>
+            <version>${tika.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/eu.bitwalker/UserAgentUtils -->
+        <dependency>
+            <groupId>eu.bitwalker</groupId>
+            <artifactId>UserAgentUtils</artifactId>
+            <version>${useragentutils.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/net.sourceforge.tess4j/tess4j -->
+        <dependency>
+            <groupId>net.sourceforge.tess4j</groupId>
+            <artifactId>tess4j</artifactId>
+            <version>${tess4j.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>${maven-compiler-plugin.version}</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>e-iceblue</groupId>-->
+<!--            <artifactId>spire.office.free</artifactId>-->
+<!--            <version>${spire.office.free.version}</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.poi/poi-scratchpad -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-scratchpad</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>org.apache.poi</groupId>-->
+        <!--            <artifactId>ooxml-schemas</artifactId>-->
+        <!--            <version>1.1</version>-->
+        <!--        </dependency>-->
+
+
+        <!--&lt;!&ndash;        &lt;!&ndash; https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml-schemas &ndash;&gt;&ndash;&gt;-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.apache.poi</groupId>-->
+        <!--            <artifactId>poi-ooxml-schemas</artifactId>-->
+        <!--            <version>4.1.2</version>-->
+        <!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>fr.opensagres.xdocreport</groupId>-->
+<!--            <artifactId>fr.opensagres.xdocreport.document</artifactId>-->
+<!--            <version>${fr.opensagres.xdocreport.document.version}</version>-->
+<!--        </dependency>-->
+<!--&lt;!&ndash;        <dependency>&ndash;&gt;-->
+<!--&lt;!&ndash;            <groupId>fr.opensagres.xdocreport</groupId>&ndash;&gt;-->
+<!--&lt;!&ndash;            <artifactId>org.apache.poi.xwpf.converter.xhtml</artifactId>&ndash;&gt;-->
+<!--&lt;!&ndash;            <version>${org.apache.poi.xwpf.converter.xhtml.version}</version>&ndash;&gt;-->
+<!--&lt;!&ndash;        </dependency>&ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>fr.opensagres.xdocreport</groupId>-->
+<!--            <artifactId>fr.opensagres.poi.xwpf.converter.xhtml</artifactId>-->
+<!--            <version>${fr.opensagres.poi.xwpf.converter.xhtml.version}</version>-->
+<!--        </dependency>-->
+    </dependencies>
+<!--    <repositories>-->
+<!--        <repository>-->
+<!--            <id>com.e-iceblue</id>-->
+<!--            <name>e-iceblue</name>-->
+<!--            <url>https://repo.e-iceblue.com/nexus/content/groups/public/</url>-->
+<!--        </repository>-->
+<!--    </repositories>-->
+
+    <build>
+        <defaultGoal>process-resources</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.16</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration> <!--fork : 如果没有该项配置，肯呢个devtools不会起作用，即应用不会restart -->
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <fork>true</fork>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.2.5.RELEASE</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <delimiters>
+                        <delimiter>@</delimiter>
+                    </delimiters>
+                    <useDefaultDelimiters>false</useDefaultDelimiters>
+                </configuration>
+            </plugin>
+
+            <!-- 文档生成-->
+            <plugin>
+                <groupId>io.github.swagger2markup</groupId>
+                <artifactId>swagger2markup-maven-plugin</artifactId>
+                <version>${swagger2markup.maven.plugin.version}</version>
+                <configuration>
+                    <!--此处端口一定要是当前项目启动所用的端口-->
+                    <swaggerInput>http://192.168.1.135:8080/v2/api-docs</swaggerInput>
+                    <outputDir>target/docs/asciidoc/generated</outputDir>
+                    <config>
+                        <!-- 除了ASCIIDOC之外，还有MARKDOWN和CONFLUENCE_MARKUP可选 -->
+                        <swagger2markup.markupLanguage>ASCIIDOC</swagger2markup.markupLanguage>
+                    </config>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
+                <version>${asciidoctor.maven.plugin.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctorj-pdf</artifactId>
+                        <version>${asciidoctorj.pdf.version}</version>
+                    </dependency>
+                    <!-- Comment this section to use the default jruby artifact provided by the plugin -->
+                    <dependency>
+                        <groupId>org.jruby</groupId>
+                        <artifactId>jruby-complete</artifactId>
+                        <version>${jruby.version}</version>
+                    </dependency>
+                    <!-- Comment this section to use the default AsciidoctorJ artifact provided by the plugin -->
+                    <dependency>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctorj</artifactId>
+                        <version>${asciidoctorj.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <sourceDirectory>target/docs/asciidoc/generated</sourceDirectory>
+                    <!-- Attributes common to all output formats -->
+                    <attributes>
+                        <sourcedir>${project.build.sourceDirectory}</sourcedir>
+                    </attributes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>generate-pdf-doc</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                        <configuration>
+                            <backend>pdf</backend>
+                            <!-- Since 1.5.0-alpha.9 PDF back-end can use 'rouge' as well as 'coderay'
+                            for source highlighting -->
+                            <!-- Due to a known issue on windows, it is recommended to use 'coderay' until an new version of 'rouge' is released.
+                                    see discussions: https://github.com/asciidoctor/asciidoctor-maven-examples/pull/58
+                                                     https://github.com/asciidoctor/asciidoctorj-pdf/issues/3
+                                                     https://github.com/jneen/rouge/issues/661
+                            -->
+                            <attributes>
+                                <source-highlighter>coderay</source-highlighter>
+                                <icons>font</icons>
+                                <pagenums/>
+                                <toc/>
+                                <idprefix/>
+                                <idseparator>-</idseparator>
+                            </attributes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+        <!--        <resources>-->
+        <!--            <resource>-->
+        <!--                &lt;!&ndash; 指定配置文件所在的resource目录 &ndash;&gt;-->
+        <!--                <directory>src/main/resources</directory>-->
+        <!--                <includes>-->
+        <!--                    <include>application.yml</include>-->
+        <!--                    <include>application-${environment}.yml</include>-->
+        <!--                    <include>logback.xml</include>-->
+        <!--                    <include>banner.txt</include>-->
+        <!--                    <include>mapper</include>-->
+        <!--                    <include>component</include>-->
+        <!--                    <include>static</include>-->
+        <!--                    <include>templates</include>-->
+        <!--                </includes>-->
+        <!--                <filtering>true</filtering>-->
+        <!--            </resource>-->
+        <!--        </resources>-->
+    </build>
+
+</project>

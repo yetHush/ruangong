@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="bigdata.filesystem.mapper.UserRightMapper">
+
+    <resultMap id="BaseResultMap" type="bigdata.filesystem.entity.UserRight">
+        <id property="userId" column="USER_ID" jdbcType="BIGINT"/>
+        <result property="rightId" column="RIGHT_ID" jdbcType="BIGINT"/>
+        <result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP"/>
+        <result property="createUser" column="CREATE_USER" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="checkUserId" resultType="long">
+        SELECT count(1)
+        FROM DM_USER
+        WHERE USER_ID = #{userId}
+    </select>
+
+    <select id="checkRightId" resultType="long">
+        SELECT count(1)
+        FROM PERMISSION
+        WHERE RIGHT_ID = #{rightId}
+    </select>
+
+    <insert id="userRightBind">
+        insert into USER_RIGHT (USER_ID, RIGHT_ID, CREATE_TIME, CREATE_USER)
+        values (#{userId}, #{rightId}, #{createTime}, #{createUser})
+    </insert>
+
+    <delete id="userRightUnbind">
+        delete
+        from USER_RIGHT
+        where USER_ID = #{userId}
+          and RIGHT_ID = #{rightId}
+    </delete>
+
+    <select id="checkUserRight" resultType="long">
+        select count(1)
+        from USER_RIGHT
+        where USER_ID = #{userId}
+          and RIGHT_ID = #{rightId}
+    </select>
+
+    <resultMap type="bigdata.filesystem.dto.query.GetUserRightsResultDTO" id="getUserRightsResultMap">
+        <result property="userId" column="USER_ID" jdbcType="BIGINT"/>
+        <result property="rightId" column="RIGHT_ID" jdbcType="BIGINT"/>
+        <result property="username" column="USERNAME" jdbcType="VARCHAR"/>
+        <result property="userNum" column="USER_NUM" jdbcType="VARCHAR"/>
+        <result property="rightName" column="RIGHT_NAME" jdbcType="VARCHAR"/>
+        <result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP"/>
+        <result property="createUser" column="CREATE_USER" jdbcType="VARCHAR"/>
+    </resultMap>
+    <select id="getUserRights" resultMap="getUserRightsResultMap">
+        select
+        ur.*,
+        u.USER_NUM,u.USERNAME,
+        r.RIGHT_NAME
+        from USER_RIGHT ur
+        left join DM_USER u on ur.USER_ID=u.USER_ID
+        left join PERMISSION r on ur.RIGHT_ID=r.RIGHT_ID
+        where 1=1
+        <if test="rightName != null and rightName !='' ">
+            and r.RIGHT_NAME like concat('%',#{rightName},'%')
+        </if>
+        <if test="username != null and username !='' ">
+            and u.USERNAME like concat('%',#{username},'%')
+        </if>
+    </select>
+
+    <resultMap type="bigdata.filesystem.dto.query.GetUserRights4CheckBoxResultDTO" id="getUserRights4CheckBoxResultMap">
+        <result property="userId" column="USER_ID" jdbcType="BIGINT"/>
+        <result property="rightId" column="RIGHT_ID" jdbcType="BIGINT"/>
+        <result property="rightName" column="RIGHT_NAME" jdbcType="VARCHAR"/>
+        <result property="id" column="id" jdbcType="BIGINT"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="on" column="cb_on" jdbcType="BOOLEAN"/>
+    </resultMap>
+
+    <select id="getUserRights4CheckBox" resultMap="getUserRights4CheckBoxResultMap">
+        select  ur.USER_ID, r.RIGHT_ID,  r.RIGHT_NAME, r.RIGHT_ID as id, r.RIGHT_NAME as name,
+        if(ur.USER_ID is null , false,true) as cb_on
+        from PERMISSION r
+        left join USER_RIGHT ur on r.RIGHT_ID=ur.RIGHT_ID
+        <if test="userId != null">
+            and ur.USER_ID = #{userId}
+        </if>
+        where 1=1
+        and r.RIGHT_TYPE='USER_RIGHT'
+    </select>
+
+    <select id="getDownloadRights" resultType="java.lang.Long">
+        select
+            ur.RIGHT_ID
+        from USER_RIGHT ur
+                 left join PERMISSION r on ur.RIGHT_ID = r.RIGHT_ID
+        where 1=1
+          and r.RIGHT_URL='/file/download'
+          and ur.USER_ID=#{userId}
+          and r.RIGHT_TYPE="USER_RIGHT"
+    </select>
+
+</mapper>
+

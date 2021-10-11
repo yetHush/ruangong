@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="../../component/pear/css/pear.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../css/public.css" media="all">
+    <style>
+        body {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+<form class="layui-form" id="catalog-info" lay-filter="catalog-info" action="">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="main-container">
+                <div class="layui-form-item">
+                    <label class="layui-form-label required">目录名</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="catalogName" lay-verify="required" lay-reqtext="目录名不能为空"
+                               placeholder="请输入目录名" value=""
+                               class="layui-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="bottom">
+    <div class="button-container">
+        <button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="catalog-save">
+            <i class="layui-icon layui-icon-ok"></i>
+            提交
+        </button>
+        <!--        <button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">-->
+        <!--            <i class="layui-icon layui-icon-refresh"></i>-->
+        <!--            重置-->
+        <!--        </button>-->
+    </div>
+</div>
+<script src="../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    // var parentData = null;
+    //
+    // function setParentData(obj) {
+    //     parentData = obj;
+    // }
+    let parentData = null;
+
+    window.setParentData = function (obj) {
+        parentData = JSON.parse(JSON.stringify(obj));
+        // console.log(parentData);
+    }
+
+
+    layui.use(['form', 'jquery', 'constant', 'jsencrypt', 'comn'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            $ = layui.jquery,
+            constant = layui.constant,
+            jsencrypt = layui.jsencrypt,
+            comn = layui.comn;
+        /**
+         * 初始化表单，要加上，不然刷新部分组件可能会不加载
+         */
+        form.render();
+        form.val("catalog-info", parentData);
+
+        let user = comn.getUser()
+        //监听提交
+        form.on('submit(catalog-save)', function (data) {
+            data = form.val("catalog-info")
+            var updateDTO = {
+                "catalogId": parentData.catalogId,
+                "catalogName": data.catalogName,
+                "updateUser": user.userNum,
+            }
+
+            comn.post(constant.backurl + 'catalog/update', JSON.stringify(updateDTO), null, successFunc = function () {
+                setTimeout(function () {
+                    parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                    parent.layui.table.reload("catalog-table");
+                }, 3000);
+            })
+
+            return false;
+        });
+    })
+
+</script>
+</body>
+</html>
+
+
+
+
+
+
+

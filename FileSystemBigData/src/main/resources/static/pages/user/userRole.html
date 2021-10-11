@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>用户角色管理</title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet"/>
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body class="pear-container">
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form" lay-filter="user-info" action="">
+            <div class="layui-form-item">
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">用户名</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="username" placeholder="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">角色名</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="roleName" placeholder="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-inline">
+                    <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="user-role-query">
+                        <i class="layui-icon layui-icon-search"></i>
+                        查询
+                    </button>
+                    <button type="reset" class="pear-btn pear-btn-md">
+                        <i class="layui-icon layui-icon-refresh"></i>
+                        重置
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table id="user-role-table" lay-filter="user-role-table"></table>
+    </div>
+</div>
+
+<script type="text/html" id="role-toolbar">
+    <button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
+        <i class="layui-icon layui-icon-add-1"></i>
+        新增绑定
+    </button>
+    <!--    <button class="pear-btn pear-btn-danger pear-btn-md" lay-event="batchRemove">-->
+    <!--        <i class="layui-icon layui-icon-delete"></i>-->
+    <!--        删除-->
+    <!--    </button>-->
+</script>
+
+<script type="text/html" id="role-bar">
+    <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="remove"><i
+            class="layui-icon layui-icon-delete"></i>
+    </button>
+</script>
+
+<!--<script type="text/html" id="role-status">-->
+<!--    {{#  if(d.status == 1){ }}-->
+<!--    <input type="radio" value="1" name="{{d.userId}}" title="正常" lay-filter="role-status" checked="checked"}>&nbsp;-->
+<!--    <input type="radio" value="2" name="{{d.userId}}" title="冻结" lay-filter="role-status" >&nbsp;-->
+<!--    <input type="radio" value="3" name="{{d.userId}}" title="删除" lay-filter="role-status" >-->
+<!--    {{#  } else if(d.status == 2) { }}-->
+<!--    <input type="radio" value="1" name="{{d.userId}}" title="正常" lay-filter="role-status" >&nbsp;-->
+<!--    <input type="radio" value="2" name="{{d.userId}}" title="冻结" lay-filter="role-status" checked="checked">&nbsp;-->
+<!--    <input type="radio" value="3" name="{{d.userId}}" title="删除" lay-filter="role-status">-->
+<!--    {{#  } else if(d.status == 3) { }}-->
+<!--    <input type="radio" value="1" name="{{d.userId}}" title="正常" lay-filter="role-status">&nbsp;-->
+<!--    <input type="radio" value="2" name="{{d.userId}}" title="冻结" lay-filter="role-status">&nbsp;-->
+<!--    <input type="radio" value="3" name="{{d.userId}}" title="删除" lay-filter="role-status" checked="checked">-->
+<!--    {{#  }-->
+<!--    }}-->
+<!--</script>-->
+
+
+<script src="../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script src="../../lib/jquery-3.4.1/jquery-3.4.1.min.js" type="text/javascript"></script>
+<script>
+    layui.use(['table', 'form', 'constant', 'jquery', 'comn'], function () {
+        let table = layui.table;
+        let form = layui.form;
+        let $ = layui.jquery;
+        let constant = layui.constant;
+        let comn = layui.comn;
+        let MODULE_PATH = "";
+        let cols = [
+            [
+                // {type:'checkbox'},
+                // {title: '用户Id', field: 'userId', align:'center'},
+                {title: '用户名', field: 'username', width: 100},
+                {title: '工号', field: 'userNum', width: 100},
+                // {title: '角色Id', field: 'roleId', align:'center'},
+                {title: '角色名', field: 'roleName', width: 100},
+                {title: '创建者', field: 'createUser', width: 100},
+                {title: '创建时间', field: 'createTime', width: 180},
+                {title: '删除', toolbar: '#role-bar', width: 100}
+            ]
+        ]
+
+        table.render({
+            elem: '#user-role-table',
+            limit: 10,
+            // where: {
+            //     id: 1,
+            // },
+            headers: comn.getHeaders(),
+            limits: [10, 20, 40, 60, 80, 100, 200],
+            url: constant.backurl + 'user/role/getUserRoles',
+            parseData: function (res) {
+                entity = comn.parseData(res);
+                if (entity == undefined || '' == entity || null == entity) {
+                    return {}
+                } else {
+                    return {
+                        "code": entity.code,
+                        "msg": entity.msg,
+                        "count": entity.entity.total,
+                        "data": entity.entity.list
+                    }
+                }
+            },
+            page: true,
+            cols: cols,
+            skin: 'line',
+            toolbar: '#role-toolbar',
+            defaultToolbar: [{
+                title: '刷新',
+                layEvent: 'refresh',
+                icon: 'layui-icon-refresh',
+            }, 'filter', 'print', 'exports']
+        });
+
+        table.on('tool(user-role-table)', function (obj) {
+            if (obj.event === 'remove') {
+                window.remove(obj);
+            }
+            // else if(obj.event === 'edit'){
+            //     window.edit(obj);
+            // }
+        });
+
+        table.on('toolbar(user-role-table)', function (obj) {
+            if (obj.event === 'add') {
+                window.add();
+            } else if (obj.event === 'refresh') {
+                window.refresh();
+            }
+        });
+
+        form.on('submit(user-role-query)', function (data) {
+            // comn.get(constant.backurl + 'user/getQueryUser', data);
+            table.reload('user-role-table', {
+                url: constant.backurl + 'user/role/getUserRoles',
+                where: data.field,
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+            })
+            return false;
+        });
+
+        // form.on('radio(role-status)', function(data){
+        //     if (data.value == 1){
+        //         layer.confirm("是否解冻该用户？", {btn: ['确认', '取消'],cancel:function () {
+        //                     layer.closeAll();
+        //                 }},
+        //             function () {
+        //                 let loading = layer.load();
+        //                 let myData = {"userId": data.elem.name, "updateUser": "temp"};
+        //                 let myJson = JSON.stringify(myData);
+        //                 comn.post_for_role(constant.backurl + 'user/freeze', myJson);
+        //             },function () {
+        //                 layer.closeAll();
+        //             }
+        //         )
+        //     }
+        //     else if (data.value == 2){
+        //         layer.confirm("是否冻结该用户？", {btn: ['确认', '取消'],cancel:function () {
+        //                     layer.closeAll();
+        //                 }},
+        //             function () {
+        //                 let loading = layer.load();
+        //                 let myData = {"userId": data.elem.name, "updateUser": "temp"};
+        //                 let myJson = JSON.stringify(myData);
+        //                 comn.post_for_role(constant.backurl + 'user/freeze', myJson);
+        //             },function () {
+        //                 layer.closeAll();
+        //             }
+        //         )
+        //     }
+        //     else if (data.value == 3){
+        //         layer.confirm("是否删除该用户？", {btn: ['确认', '取消'],cancel:function () {
+        //                     layer.closeAll();
+        //                 }},
+        //             function () {
+        //                 let loading = layer.load();
+        //                 let myData = {"userId": data.elem.name, "updateUser": "temp"};
+        //                 let myJson = JSON.stringify(myData);
+        //                 comn.post_for_role(constant.backurl + 'user/delete', myJson);
+        //             },function () {
+        //                 layer.closeAll();
+        //             }
+        //         )
+        //     }
+
+        // });
+
+        window.add = function () {
+            layer.open({
+                type: 2,
+                title: '新增绑定',
+                shade: 0.1,
+                maxmin: true,
+                area: [comn.isModile() ? '100%' : '500px', comn.isModile() ? '100%' : '400px'],
+                content: '/pages/user/userRoleBind.html'
+            })
+            ;
+        }
+
+        // window.power = function(obj){
+        //     layer.open({
+        //         type: 2,
+        //         title: '授权',
+        //         shade: 0.1,
+        //         area: ['320px', '400px'],
+        //         content: MODULE_PATH + 'edit.html'
+        // content: '/pages/user/edit.html'
+        // });
+        // }
+
+        // window.edit = function(obj){
+        //     layer.open({
+        //         type: 2,
+        //         title: '修改',
+        //         shade: 0.1,
+        //         area: [comn.isModile() ? '100%' : '500px', comn.isModile() ? '100%' : '400px'],
+        //         content: MODULE_PATH + 'edit.html'
+        //
+        // content:  '/pages/user/edit.html'
+        // });
+        // }
+
+        window.remove = function (data) {
+            layer.open({
+                content: "确定要解绑该用户角色？"
+                , btn: ['确定', '取消'],
+                style: 'width:80%',
+                yes: function (index, data1) {
+                    //前端获取到的数据
+                    let myData = {
+                        "userId": data.data.userId,
+                        "roleId": data.data.roleId,
+                        // "createUser": data.data.createUser,
+                        // "createTime": data.data.createTime
+                    };
+                    let myJson = JSON.stringify(myData);
+                    // comn.post(constant.backurl + 'user/role/unbind', myJson);
+                    comn.post(constant.backurl + 'user/role/unbind', myJson, null, function () {
+                        table.reload("user-role-table", {
+                            url: constant.backurl + 'user/role/getUserRoles'
+                        });
+                    }, function () {
+                        parent.layer.close(index);//关闭窗口
+                    })
+                },
+                cancel: function (index) { //按右上角“X”按钮
+                    parent.layer.close(index);//关闭窗口
+                },
+            })
+
+        }
+        //
+        // window.batchRemove = function (obj) {
+        //     let data = table.checkStatus(obj.config.id).data;
+        //     if (data.length === 0) {
+        //         layer.msg("未选中数据", {icon: 3, time: 1000});
+        //         return false;
+        //     }
+        //     let ids = "";
+        //     for (let i = 0; i < data.length; i++) {
+        //         ids += data[i].userId + ",";
+        //     }
+        //     ids = ids.substr(0, ids.length - 1);
+        //     layer.confirm('确定要解绑这些用户和角色', {icon: 3, title: '提示'}, function (index) {
+        //         layer.close(index);
+        //         let loading = layer.load();
+        //         // data.field.status=3;
+        //         data = JSON.stringify(data);
+        //         console.log("data" + data);
+        //         comn.get(constant.backurl + 'user/role/unbind', data);
+        //         $.ajax({
+        //             url: MODULE_PATH + "batchRemove/" + ids,
+        //             dataType: 'json',
+        //             type: 'delete',
+        //             success: function (result) {
+        //                 layer.close(loading);
+        //                 if (result.success) {
+        //                     layer.msg(result.msg, {icon: 1, time: 1000}, function () {
+        //                         table.reload('role-table');
+        //                     });
+        //                 } else {
+        //                     layer.msg(result.msg, {icon: 2, time: 1000});
+        //                 }
+        //             }
+        //         })
+        //     });
+        // }
+
+        window.refresh = function () {
+            table.reload('user-role-table');
+        }
+    })
+</script>
+</body>
+</html>

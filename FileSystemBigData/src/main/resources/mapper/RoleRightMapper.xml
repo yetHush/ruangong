@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="bigdata.filesystem.mapper.RoleRightMapper">
+
+    <resultMap id="BaseResultMap" type="bigdata.filesystem.entity.RoleRight">
+        <id property="roleId" column="ROLE_ID" jdbcType="BIGINT"/>
+        <result property="rightId" column="RIGHT_ID" jdbcType="BIGINT"/>
+        <result property="roleName" column="ROLE_NAME" jdbcType="VARCHAR"/>
+        <result property="rightName" column="RIGHT_NAME" jdbcType="VARCHAR"/>
+        <result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP"/>
+        <result property="createUser" column="CREATE_USER" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="checkRoleId" resultType="long">
+        SELECT count(1)
+        FROM ROLE
+        WHERE ROLE_ID = #{roleId}
+    </select>
+
+    <select id="checkRightId" resultType="long">
+        SELECT count(1)
+        FROM PERMISSION
+        WHERE RIGHT_ID = #{rightId}
+    </select>
+
+    <select id="getRightsByRoleId" resultType="java.lang.Long">
+        select RIGHT_ID
+        from ROLE_RIGHT
+        where ROLE_ID = #{roleId}
+    </select>
+
+    <insert id="roleRightsBind" parameterType="java.util.List">
+        insert into ROLE_RIGHT (ROLE_ID, RIGHT_ID, CREATE_TIME, CREATE_USER)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.roleId}, #{item.rightId},
+            #{item.createTime}, #{item.createUser}
+            )
+        </foreach>
+    </insert>
+
+    <delete id="roleRightUnbind">
+        delete
+        from ROLE_RIGHT
+        where ROLE_ID = #{roleId}
+          and RIGHT_ID = #{rightId}
+    </delete>
+
+    <resultMap type="bigdata.filesystem.dto.query.GetRoleRightsResultDTO" id="getRoleRightsResultMap">
+    </resultMap>
+    <select id="getRoleRights" resultMap="getRoleRightsResultMap">
+        select
+        rr.*,
+        r1.ROLE_NAME,
+        r.RIGHT_NAME
+        from ROLE_RIGHT rr
+        left join ROLE r1 on rr.ROLE_ID=r1.ROLE_ID
+        left join PERMISSION r on rr.RIGHT_ID=r.RIGHT_ID
+        where 1=1
+        <if test="rightName != null and rightName !='' ">
+            and r.RIGHT_NAME like concat('%',#{rightName},'%')
+        </if>
+        <if test="roleName != null and roleName !='' ">
+            and r1.ROLE_NAME like concat('%',#{roleName},'%')
+        </if>
+    </select>
+
+    <resultMap type="bigdata.filesystem.dto.query.GetRoleRights4CheckBoxResultDTO" id="getRoleRights4CheckBoxResultMap">
+        <result property="roleId" column="ROLE_ID" jdbcType="BIGINT"/>
+        <result property="rightId" column="RIGHT_ID" jdbcType="BIGINT"/>
+        <result property="rightName" column="RIGHT_NAME" jdbcType="VARCHAR"/>
+        <result property="id" column="id" jdbcType="BIGINT"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="on" column="cb_on" jdbcType="BOOLEAN"/>
+    </resultMap>
+    <select id="getRoleRights4CheckBox" resultMap="getRoleRights4CheckBoxResultMap">
+        select rr.ROLE_ID, r.RIGHT_ID, r.RIGHT_NAME, r.RIGHT_ID as id, r.RIGHT_NAME as name,
+        if(rr.ROLE_ID is null , false,true) as cb_on
+        from PERMISSION r
+        left join ROLE_RIGHT rr on r.RIGHT_ID=rr.RIGHT_ID
+        <if test="roleId != null">
+            and rr.ROLE_ID = #{roleId}
+        </if>
+        where 1=1
+        and r.RIGHT_TYPE='USER_RIGHT'
+    </select>
+
+    <select id="getDownloadRights" resultType="java.lang.Long">
+        select
+            rr.RIGHT_ID
+        from ROLE_RIGHT rr
+                 left join PERMISSION r on rr.RIGHT_ID = r.RIGHT_ID
+        where 1=1
+          and r.RIGHT_URL='/file/download'
+          and rr.ROLE_ID=#{roleId}
+          and r.RIGHT_TYPE="USER_RIGHT"
+    </select>
+</mapper>

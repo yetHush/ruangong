@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户绑定目录权限</title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<form class="layui-form" lay-filter="right-info" action="">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="main-container">
+                <div class="layui-form-item">
+                    <label class="layui-form-label required">用户名</label>
+                    <div class="layui-input-block">
+                        <input id="choose-user" layfilter="choose-user" type="text" name="userId" lay-verify="required"
+                               lay-reqtext="用户名不能为空" autocomplete="off" placeholder="点击选择" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">目录名</label>
+                    <div class="layui-input-block">
+                        <input name="parentCatalogId" autocomplete="off" class="layui-input" lay-filter="ptree"
+                               id="ptree">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label required">权限名</label>
+                    <div class="layui-input-block">
+                        <input id="choose-right" layfilter="choose-right" type="text" name="rightId"
+                               lay-verify="required"
+                               lay-reqtext="权限名不能为空" autocomplete="off"
+                               placeholder="点击选择" class="layui-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="bottom">
+    <div class="button-container">
+        <button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit=""
+                lay-filter="right-add">
+            <i class="layui-icon layui-icon-ok"></i>提交
+        </button>
+    </div>
+</div>
+
+<script src="../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../../js/lay-config.js?v=2.0.0" charset="utf-8"></script>
+<script>
+    layui.use(['treeSelect', 'table', 'form', 'jquery', 'constant', 'comn'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+        let constant = layui.constant;
+        let table = layui.table;
+        let comn = layui.comn;
+        let treeSelect = layui.treeSelect;
+
+        let user = comn.getUser()
+        $('#choose-user').focus(choose_user);
+
+        function choose_user(data) {
+            var index = layer.open({
+                title: '选择用户',
+                type: 2,
+                shade: 0.2,
+                maxmin: true,
+                shadeClose: true,
+                area: ['90%', '80%'],
+                content: '/pages/user/user_info.html',
+                end: function () {
+                    form.render('select');
+                }
+            });
+        }
+
+        $('#choose-right').focus(choose_right);
+
+        function choose_right() {
+            var index = layer.open({
+                title: '选择权限',
+                type: 2,
+                shade: 0.2,
+                maxmin: true,
+                shadeClose: true,
+                area: ['90%', '80%'],
+                content: '/pages/right/right_info.html',
+                success: function (layero, index) {
+                    // var body = layer.getChildFrame('body', index);
+                    var iframe = window['layui-layer-iframe' + index];
+                    iframe.setRightType("CATALOG_RIGHT");
+                },
+                end: function () {
+                    form.render('select');
+                }
+            });
+            $(window).on("resize", function () {
+                layer.full(index);
+            });
+        }
+
+
+        form.render(); //更新全部
+        treeSelect.render({
+            elem: '#ptree',
+            data: constant.backurl + 'catalog/getCatalogTree',
+            type: 'GET',
+            headers: comn.getHeaders(),
+            placeholder: '点击选择父目录',
+
+            style: {
+                folder: {
+                    enable: true
+                },
+                line: {
+                    enable: true
+                }
+            },
+            parseData: comn.parseData,
+            click: function (obj) {
+                document.getElementById("ptree").field = obj.current.id;
+                let completePath = obj.current.completePath;
+                // console.log(completePath)
+                $('#' + obj.inputId).val(completePath);
+            },
+            // 加载完成后的回调函数
+            success: function (d) {
+                // console.log(d)
+            }
+        });
+        form.on('submit(reset)', function () {
+            form.val("right-info", {
+                "catalogId": null,
+                "userId": null,
+                "rightId": null,
+                // "remark": null,
+            });
+            document.getElementById("ptree").field = null
+            treeSelect.revokeNode('ptree', function (d) {
+                // console.log(d);
+                // console.log(d.treeId);
+            })
+        });
+
+        //监听提交
+        form.on('submit(right-add)', function () {
+            data = form.val("right-info")
+            let userId = document.getElementById("choose-user").field;
+            let rightId = document.getElementById("choose-right").field;
+            var createDTO = {
+                "rightId": rightId,
+                // "remark": data.remark,
+                "createUser": user.userNum,
+                "userId": userId,
+                "catalogId": document.getElementById("ptree").field,
+            }
+            comn.post(constant.backurl + 'user/catalog/right/bind', JSON.stringify(createDTO), null, successFunc = function () {
+                setTimeout(function () {
+                    parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                    parent.layui.table.reload("catalog-right-table");
+                }, 3000);
+            })
+
+            return false;
+
+        });
+
+    })
+</script>
+
+<script>
+</script>
+</body>
+</html>

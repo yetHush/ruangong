@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>自动填表管理</title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet"/>
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body class="pear-container">
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">表名</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="tableName" placeholder="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">开始日期</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="fromTime" autocomplete="off" id="fromTime" class="layui-input"
+                               placeholder="开始日期">
+                    </div>
+                </div>
+
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">结束日期</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="toTime" autocomplete="off" id="toTime" class="layui-input"
+                               placeholder="结束日期">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-inline">
+                    <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="log-query">
+                        <i class="layui-icon layui-icon-search"></i>
+                        查询
+                    </button>
+                    <button type="reset" class="pear-btn pear-btn-md">
+                        <i class="layui-icon layui-icon-refresh"></i>
+                        重置
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table id="auto-table" lay-filter="auto-table"></table>
+    </div>
+</div>
+
+<script type="text/html" id="auto-toolbar">
+    <button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
+        <i class="layui-icon layui-icon-add-1"></i>
+        新增
+    </button>
+    <button class="pear-btn pear-btn-primary pear-btn-md" lay-event="addExcel">
+        <i class="layui-icon layui-icon-add-1"></i>
+        读取Excel数据
+    </button>
+    <input id="choose-file" type="file" style="display: none"
+           accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+    <!--           accept="application/vnd.ms-excel,">-->
+</script>
+
+<script type="text/html" id="auto-bar">
+    <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i
+            class="layui-icon layui-icon-edit"></i></button>
+    <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="delete"><i
+            class="layui-icon layui-icon-delete"></i></button>
+</script>
+
+<script src="../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['table', 'form', 'layer', 'constant', 'jquery', 'comn', 'laydate'], function () {
+        let table = layui.table;
+        let form = layui.form;
+        let $ = layui.jquery;
+        let layer = layui.layer;
+        let constant = layui.constant;
+        let comn = layui.comn;
+        let laydate = layui.laydate;
+        let MODULE_PATH = "";
+        laydate.render({
+            elem: '#fromTime', //开始时间和结束时间所在 input 框的父选择器
+            //设置开始日期、日期日期的 input 选择器
+            // event: 'click', //触发事件
+            type: 'datetime',
+            format: 'yyyy-MM-dd HH:mm:ss', //日期格式
+            trigger: 'click'//呼出事件改成click
+        });
+        laydate.render({
+            elem: '#toTime', //开始时间和结束时间所在 input 框的父选择器
+            //设置开始日期、日期日期的 input 选择器
+            // event: 'click', //触发事件
+            type: 'datetime',
+            format: 'yyyy-MM-dd HH:mm:ss', //日期格式
+            trigger: 'click'//呼出事件改成click
+        });
+        let cols = [
+            [
+                // {type: 'checkbox'},
+                // {title: '日志Id', field: 'logId', align:'center', width: 100},
+                {title: '表名', field: 'tableName', width: 150},
+                {title: '内容', field: 'content', width: 300, event: "clickContent"},
+                {title: '创建者', field: 'createUser', width: 100},
+                {title: '创建时间', field: 'createTime', width: 180},
+                {title: '更新者', field: 'updateUser', width: 100},
+                {title: '更新时间', field: 'updateTime', width: 180},
+                {title: '操作', toolbar: '#auto-bar', width: 100},
+            ]
+        ]
+        let user = comn.getUser()
+        table.render({
+            elem: '#auto-table',
+            limit: 10,
+            // where: {
+            //     id: 1,
+            // },
+            headers: comn.getHeaders(),
+            limits: [10, 20, 40, 60, 80, 100, 200],
+            url: constant.backurl + 'auto/getAutos',
+            text: {
+                none: '暂无数据'
+            },
+            parseData: function (res) {
+                entity = comn.parseData(res);
+                if (entity == undefined || '' == entity || null == entity) {
+                    return {}
+                } else {
+                    return {
+                        "code": entity.code,
+                        "msg": entity.msg,
+                        "count": entity.entity.total,
+                        "data": entity.entity.list
+                    }
+                }
+            },
+            page: true,
+            cols: cols,
+            skin: 'line',
+            toolbar: '#auto-toolbar',
+            defaultToolbar: [{
+                title: '刷新',
+                layEvent: 'refresh',
+                icon: 'layui-icon-refresh',
+            }, 'filter', 'print', 'exports']
+        });
+
+        table.on('tool(auto-table)', function (obj) {
+            if (obj.event === 'delete') {
+                window.delete(obj);
+            } else if (obj.event === 'edit') {
+                window.edit(obj);
+            } else if (obj.event === 'clickContent') {
+                window.clickContent(obj.data.content)
+            }
+        });
+
+        table.on('toolbar(auto-table)', function (obj) {
+            if (obj.event === 'add') {
+                window.add();
+            } else if (obj.event === 'refresh') {
+                window.refresh();
+            } else if (obj.event === 'addExcel') {
+                window.addExcel();
+            }
+        });
+
+        form.on('submit(log-query)', function (data) {
+            table.reload('auto-table', {
+                url: constant.backurl + 'auto/getAutos',
+                where: data.field,
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+            })
+            return false;
+        });
+
+        window.clickContent = function (content) {
+            // layer.open({
+            //     type: 1,   //类型代表在页面加载显示
+            //     // content: $("#json-renderer"),
+            //     success: function () {
+            //         $("#json-renderer").JSONView(content, {collapsed: true});
+            //     }
+            // });
+            layer.open({
+                type: 2,
+                title: '内容',
+                shade: 0.1,
+                maxmin: true,
+                area: [comn.isModile() ? '100%' : '500px', comn.isModile() ? '100%' : '400px'],
+                content: '/pages/auto/jsonview.html',
+                success: function (layero, index) {
+                    // var body = layer.getChildFrame('body', index);
+                    var iframe = window['layui-layer-iframe' + index];
+                    iframe.setParentData(content)
+                }
+            });
+        }
+
+        window.delete = function (data) {
+            var delete_index = layer.confirm("是否删除该数据？(无法恢复)", {
+                    btn: ['确认', '取消'], cancel: function () {
+                        parent.layer.close(delete_index);//关闭窗口
+                    }
+                },
+                function () {
+                    // let loading = layer.load();
+                    let myData = {"autoId": data.data.autoId, "updateUser": user.userNum};
+                    let myJson = JSON.stringify(myData);
+                    comn.post(constant.backurl + 'auto/delete', myJson, null, function () {
+                        table.reload("auto-table", {
+                            url: constant.backurl + 'auto/getAutos'
+                        });
+                    }, function () {
+                        parent.layer.close(delete_index);//关闭窗口
+                    });
+                }, function () {
+                    parent.layer.close(delete_index);//关闭窗口
+                }
+            )
+        }
+
+        window.refresh = function () {
+            table.reload('auto-table');
+        }
+
+        window.add = function () {
+            layer.open({
+                type: 2,
+                title: '新增',
+                shade: 0.1,
+                maxmin: true,
+                area: [comn.isModile() ? '100%' : '500px', comn.isModile() ? '100%' : '400px'],
+                content: '/pages/auto/add.html'
+            })
+            ;
+        }
+
+        window.edit = function (obj) {
+            var data = obj.data;
+            layer.open({
+                type: 2,
+                title: '修改',
+                shade: 0.1,
+                maxmin: true,
+                area: [comn.isModile() ? '100%' : '500px', comn.isModile() ? '100%' : '400px'],
+                content: '/pages/auto/edit.html',
+                success: function (layero, index) {
+                    // var body = layer.getChildFrame('body', index);
+                    var iframe = window['layui-layer-iframe' + index];
+                    iframe.setParentData(data)
+                }
+            });
+        }
+
+        let choosefile = $("#choose-file");
+        window.addExcel = function () {
+            // 自动触发点击事件，选择文件
+            choosefile.click();
+        }
+
+        const FILE_TYPE = ['xls', 'xlsx'];       // 限制文件上传类型
+        const FILE_MAX_SIZE = 10 * 1024 * 1024;      // 限制文件大小
+        // 监听input的change事件获取选择的文件
+        choosefile.change(function (e) {
+            console.log("change")
+            // 获取文件
+            let file = e.target.files[0];
+            if (undefined == file || null == file) {
+                choosefile.val('');
+                layer.msg('未选择文件', {time: 3000, icon: 2});
+                return;
+            }
+            // 判断文件类型
+            let currentFileType = file.name.slice((file.name.lastIndexOf('.')) + 1);
+            // 如果当前选择的文件不在限制的文件类型范围内，提示选择错误文件
+            if (!FILE_TYPE.includes(currentFileType)) {
+                // 将input选择器里面的内容置空，并将结果返回出去
+                choosefile.val('');
+                layer.msg('文件类型错误', {time: 3000, icon: 2});
+                return;
+            }
+            // 判断文件大小
+            if (file.size > FILE_MAX_SIZE) {
+                // 将input选择器里面的内容置空，并将结果返回出去
+                choosefile.val('');
+                layer.msg('文件大小超出限制', {time: 3000, icon: 2});
+                return;
+            }
+            // 将input选择器里面的内容置空，并将选择到的文件结果传出去
+
+            var fm = new FormData();
+            fm.append("file", file)
+            comn.post_file(constant.backurl + 'auto/excel2json', fm, null, successFunc = function () {
+                setTimeout(function () {
+                    layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                    layui.table.reload("auto-table");
+                }, 3000);
+            }, completeFunc = function(){
+                choosefile.val('');
+                // choosefile.after(choosefile.clone().val(""));
+                // choosefile.remove();
+            })
+        });
+
+    })
+</script>
+</body>
+</html>

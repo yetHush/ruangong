@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>目录列表</title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet"/>
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+
+<div class="layuimini-container">
+    <div class="layuimini-main">
+
+        <table class="layui-hide" id="catalog-table" lay-filter="catalog-table">
+            <!-- 数据渲染区  -->
+        </table>
+
+        <script type="text/html" id="choose">
+            <a class="layui-btn layui-btn-xs" lay-event="select">选择</a>
+        </script>
+
+    </div>
+</div>
+
+<script src="../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+
+    layui.use(['layer', 'laypage', 'constant', 'comn', 'table', 'jquery'], function () {
+        let layer = layui.layer, //弹层
+            laypage = layui.laypage, //分页
+            table = layui.table, //表格
+            $ = layui.jquery,
+            constant = layui.constant,
+            comn = layui.comn,
+            MODULE_PATH = "",
+            cols = [[
+                {title: '完整目录', field: 'completePath', align: 'center'},
+                {title: '创建者', field: 'createUser', align: 'center'},
+                {fixed: 'right', title: '', toolbar: '#choose'}
+            ]]
+
+        table.render({
+            elem: '#catalog-table',
+            limit: 10,
+            headers: comn.getHeaders(),
+            limits: [10, 20, 40, 60, 80, 100, 200],
+            url: constant.backurl + 'catalog/getAllCatalog',
+            parseData: function (res) {
+                entity = comn.parseData(res);
+                var result;
+                if (this.page.curr) {
+                    result = res.entity.entity.slice(this.limit * (this.page.curr - 1), this.limit * this.page.curr);
+                } else {
+                    result = res.entity.entity.slice(0, this.limit);
+                }
+                if (entity == undefined || '' == entity || null == entity) {
+                    return {}
+                } else {
+                    return {
+                        "code": entity.code,
+                        "msg": entity.msg,
+                        "count": entity.entity.length,
+                        "data": result
+                    }
+                }
+            },
+            page: true,
+            cols: cols,
+            skin: 'line'
+        });
+
+        table.on('tool(catalog-table)', function (obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'select':
+                    var parent$ = window.parent.layui.jquery;
+                    window.parent.document.getElementById("choose-catalog").field = data.catalogId;
+                    parent$("#choose-catalog").val(data.completePath).change();
+                    // parent$("#choose-catalog").field = (data.catalogId);
+                    var index = parent.layer.getFrameIndex(window.name);
+                    parent.layer.close(index);
+                    break;
+            }
+        })
+
+    });
+</script>
+</body>
+</html>

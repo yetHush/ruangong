@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>首页</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="../css/public.css" media="all">
+    <style>
+        .top-panel {
+            border: 1px solid #eceff9;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .top-panel > .layui-card-body {
+            height: 60px;
+        }
+
+        .top-panel-number {
+            line-height: 60px;
+            font-size: 30px;
+            border-right: 1px solid #eceff9;
+        }
+
+        .top-panel-tips {
+            line-height: 30px;
+            font-size: 12px
+        }
+    </style>
+</head>
+<body>
+<!--<div class="layuimini-container">-->
+<div class="layuimini-main">
+
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-xs12 layui-col-md3">
+
+            <div class="layui-card top-panel">
+                <div class="layui-card-header">今日访问</div>
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5">
+                        <div class="layui-col-xs9 layui-col-md9 top-panel-number" id="todayLoginNum">
+                            0
+                        </div>
+                        <div class="layui-col-xs3 layui-col-md3 top-panel-tips">
+                            昨天 <br><a style="color: #1aa094" id="yesterdayLoginNum">0</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="layui-col-xs12 layui-col-md3">
+
+            <div class="layui-card top-panel">
+                <div class="layui-card-header">提交次数</div>
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5">
+                        <div class="layui-col-xs9 layui-col-md9 top-panel-number" id="todaySubmitNum">
+                            0
+                        </div>
+                        <div class="layui-col-xs3 layui-col-md3 top-panel-tips">
+                            昨天 <br><a style="color: #1aa094" id="yesterdaySubmitNum">0</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="layui-col-xs12 layui-col-md3">
+
+            <div class="layui-card top-panel">
+                <div class="layui-card-header">上传文件</div>
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5">
+                        <div class="layui-col-xs9 layui-col-md9 top-panel-number" id="todayUploadNum">
+                            0
+                        </div>
+                        <div class="layui-col-xs3 layui-col-md3 top-panel-tips">
+                            昨天 <br><a style="color: #1aa094" id="yesterdayUploadNum">0</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="layui-col-xs12 layui-col-md3">
+
+            <div class="layui-card top-panel">
+                <div class="layui-card-header">下载文件</div>
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5">
+                        <div class="layui-col-xs9 layui-col-md9 top-panel-number" id="todayDownloadNum">
+                            0
+                        </div>
+                        <div class="layui-col-xs3 layui-col-md3 top-panel-tips">
+                            昨天 <br><a style="color: #1aa094" id="yesterdayDownloadNum">0</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-xs12 layui-col-md9">
+            <div id="echarts-records" style="background-color:#ffffff;min-height:400px;padding: 10px"></div>
+        </div>
+        <div class="layui-col-xs12 layui-col-md3">
+            <div id="echarts-pies" style="background-color:#ffffff;min-height:400px;padding: 10px"></div>
+        </div>
+    </div>
+
+</div>
+<!--</div>-->
+<script src="../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['layer', 'echarts', 'constant', 'comn'], function () {
+        var $ = layui.jquery,
+            layer = layui.layer,
+            echarts = layui.echarts,
+            comn = layui.comn,
+            constant = layui.constant;
+
+        function subDate(date, days) {
+            if (days == undefined || days == '') {
+                days = 1;
+            }
+            let newdate = new Date(date.getTime() - 1000 * 60 * 60 * 24 * days);
+            return newdate;
+        }
+
+        function getMD(date) {
+            var dateParse = Date.parse(date);//转成时间戳
+            var time = new Date(dateParse);//再转成标准时间
+
+            return String(time.getMonth() + 1) + "-" + String(time.getDay());
+        }
+
+        // 获取当前时间
+        let day1 = subDate(new Date(), 1);
+        let day2 = subDate(day1, 1);
+        let day3 = subDate(day2, 1);
+        let day4 = subDate(day3, 1);
+        let day5 = subDate(day4, 1);
+        let day6 = subDate(day5, 1);
+        let day7 = subDate(day6, 1);
+
+        let days = [getMD(day7), getMD(day6), getMD(day5), getMD(day4), getMD(day3), getMD(day2), getMD(day1)]
+
+        /**
+         * 报表功能
+         */
+        var echartsRecords = echarts.init(document.getElementById('echarts-records'), 'walden');
+
+        var optionRecords = {
+            title: {
+                text: '文件-报表图'
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    label: {
+                        backgroundColor: '#6a7985'
+                    }
+                }
+            },
+            legend: {
+                data: ['上传文件', '下载文件']
+            },
+            toolbox: {
+                feature: {
+                    saveAsImage: {}
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: days
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value'
+                }
+            ],
+            series: [
+                {
+                    name: '上传文件',
+                    type: 'line',
+                    areaStyle: {},
+                    data: [0, 0, 0, 0, 0, 0, 0]
+                },
+                {
+                    name: '下载文件',
+                    type: 'line',
+                    stack: '总量',
+                    label: {
+                        normal: {
+                            show: true,
+                            position: 'top'
+                        }
+                    },
+                    areaStyle: {},
+                    data: [0, 0, 0, 0, 0, 0, 0]
+                }
+            ]
+        };
+        echartsRecords.setOption(optionRecords);
+
+
+        /**
+         * 玫瑰图表
+         */
+        var echartsPies = echarts.init(document.getElementById('echarts-pies'), 'walden');
+        var optionPies = {
+            title: {
+                text: '用户状态-玫瑰图',
+                left: 'center'
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: '{a} <br/>{b} : {c} ({d}%)'
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left',
+                top: "6%",
+                data: ['正常', '冻结', '删除']
+            },
+            series: [
+                {
+                    name: '用户状态',
+                    type: 'pie',
+                    radius: '55%',
+                    center: ['50%', '60%'],
+                    roseType: 'radius',
+                    data: [
+                        {value: 0, name: '正常'},
+                        {value: 0, name: '冻结'},
+                        {value: 0, name: '删除'}
+                    ],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+        echartsPies.setOption(optionPies);
+
+
+        // echarts 窗口缩放自适应
+        window.onresize = function () {
+            echartsRecords.resize();
+        }
+
+        comn.get(constant.backurl+'log/getHomeData', null, function(entity){
+            $('#todayLoginNum').text(entity.todayLoginNum);
+            $('#yesterdayLoginNum').text(entity.yesterdayLoginNum);
+            $('#todaySubmitNum').text(entity.todaySubmitNum);
+            $('#yesterdaySubmitNum').text(entity.yesterdaySubmitNum);
+            $('#todayUploadNum').text(entity.todayUploadNum);
+            $('#yesterdayUploadNum').text(entity.yesterdayUploadNum);
+            $('#todayDownloadNum').text(entity.todayDownloadNum);
+            $('#yesterdayDownloadNum').text(entity.yesterdayDownloadNum);
+            echartsRecords.setOption({
+                xAxis: {data: entity.days},
+                series: [{name: "上传文件", data: entity.uploadNums},
+                    {name: "下载文件", data: entity.downloadNums},]
+            });
+            echartsPies.setOption({
+                series: [
+                    {
+                        name: '用户状态',
+                        data: [
+                            {value: entity.userNums[0], name: '正常'},
+                            {value: entity.userNums[1], name: '冻结'},
+                            {value: entity.userNums[2], name: '删除'}
+                        ],
+                    }]
+            })
+        })
+
+    });
+</script>
+</body>
+</html>

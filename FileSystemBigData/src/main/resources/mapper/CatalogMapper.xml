@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="bigdata.filesystem.mapper.CatalogMapper">
+    <resultMap id="BaseResultMap" type="bigdata.filesystem.entity.Catalog">
+        <id property="catalogId" column="CATALOG_ID" jdbcType="BIGINT"/>
+        <result property="catalogName" column="CATALOG_NAME" jdbcType="VARCHAR"/>
+        <result property="parentCatalogId" column="PARENT_CATALOG_ID" jdbcType="BIGINT"/>
+        <result property="status" column="STATUS" jdbcType="TINYINT"/>
+        <result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP"/>
+        <result property="createUser" column="CREATE_USER" jdbcType="VARCHAR"/>
+        <result property="completePath" column="COMPLETE_PATH" jdbcType="VARCHAR"/>
+    </resultMap>
+    <select id="checkCatalogId" resultType="long">
+        select count(1)
+        from CATALOG
+        where CATALOG_ID = #{catalogId}
+    </select>
+
+    <select id="getParentCatalogId" resultType="long">
+        select PARENT_CATALOG_ID
+        from CATALOG
+        where CATALOG_NAME = #{catalogName}
+    </select>
+
+    <select id="getCatalogNameById" resultType="String">
+        select CATALOG_NAME
+        from CATALOG
+        where CATALOG_ID = #{catalogId}
+    </select>
+
+    <delete id="deleteCatalogRight">
+        delete
+        from CATALOG_RIGHT
+        where CATALOG_ID = #{catalogId}
+    </delete>
+
+    <delete id="deleteFileRight">
+        delete
+        from FILE_RIGHT
+        where CATALOG_NAME = #{catalogName}
+    </delete>
+
+    <delete id="deleteFile">
+        delete
+        from DOCUMENT
+        where PARENT_CATALOG_ID = #{parentCatalogId}
+    </delete>
+
+    <select id="getAllCatalog" resultMap="BaseResultMap">
+        select *
+        from CATALOG
+    </select>
+
+    <select id="findByParentIsNull" resultMap="BaseResultMap">
+        select *
+        from CATALOG
+        where PARENT_CATALOG_ID is null
+           or PARENT_CATALOG_ID = ''
+    </select>
+
+    <select id="getChildById" resultMap="BaseResultMap">
+        select *
+        from CATALOG
+        where PARENT_CATALOG_ID = #{parentCatalogId}
+    </select>
+    <select id="getChildCatalogIdByParentCatalogId" resultType="java.lang.Long">
+        select CATALOG_ID
+        from CATALOG
+        where PARENT_CATALOG_ID = #{parentCatalogId}
+    </select>
+
+
+    <select id="getChildCatalogByParentCatalogId" resultMap="BaseResultMap">
+        select *
+        from catalog
+        where 1=1
+        <if test="parentCatalogId == null">
+         and PARENT_CATALOG_ID is null
+        </if>
+        <if test="parentCatalogId != null">
+            and PARENT_CATALOG_ID = #{parentCatalogId}
+        </if>
+
+    </select>
+
+    <resultMap type="bigdata.filesystem.dto.query.GetCatalogsResultDTO" id="getCatalogsResultMap"
+               extends="BaseResultMap">
+        <result property="parentCatalogName" column="PARENT_CATALOG_NAME" jdbcType="VARCHAR"/>
+    </resultMap>
+    <select id="getCatalogs" resultMap="getCatalogsResultMap">
+        select
+        c1.*,
+        c2.CATALOG_NAME as PARENT_CATALOG_NAME
+        from CATALOG c1
+        left join CATALOG c2 on c1.PARENT_CATALOG_ID=c2.CATALOG_ID
+        where 1=1
+        <if test="catalogName != null and catalogName !='' ">
+            and c1.CATALOG_NAME like concat('%',#{catalogName},'%')
+        </if>
+        <if test="status != null">
+            and c1.STATUS = #{status}
+        </if>
+    </select>
+
+</mapper>

@@ -1,0 +1,98 @@
+{
+  "homeInfo": {
+    "title": "首页",
+    "href": "/pages/welcome.html"
+  },
+  "logoInfo": {
+    "title": "AgricultureSystem",
+    "image": "images/logo.png",
+    "href": ""
+  },
+  "menuInfo": [
+    {
+      "title": "信息管理",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "用户管理",
+          "href": "",
+          "icon": "fa fa-user-circle",
+          "target": "_self",
+          "child": [
+            {
+              "title": "用户管理",
+              "href": "pages/user/userManage.html",
+              "icon": "fa fa-user-o",
+              "target": "_self"
+            },
+            {
+              "title": "用户角色管理",
+              "href": "pages/user/userRole.html",
+              "icon": "fa fa-user-o",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "角色管理",
+          "href": "pages/role/role.html",
+          "icon": "fa fa-address-card",
+          "target": "_self"
+        },
+        {
+          "title": "权限管理",
+          "href": "",
+          "icon": "fa fa-cog",
+          "target": "_self",
+          "child": [
+            {
+              "title": "权限管理",
+              "href": "pages/right/right.html",
+              "icon": "fa fa-cogs",
+              "target": "_self"
+            },
+            {
+              "title": "用户权限管理",
+              "href": "pages/right/userRight.html",
+              "icon": "fa fa-user-o",
+              "target": "_self"
+            },
+            {
+              "title": "角色权限管理",
+              "href": "pages/right/roleRight.html",
+              "icon": "fa fa-address-card",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "目录管理",
+          "href": "",
+          "icon": "fa fa-folder",
+          "target": "_self",
+          "child": [
+            {
+              "title": "目录管理",
+              "href": "pages/catalog/catalog.html",
+              "icon": "fa fa-folder-o",
+              "target": "_self"
+            },
+            {
+              "title": "目录权限管理",
+              "href": "pages/user/userCatalog.html",
+              "icon": "fa fa-folder-o",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "日志管理",
+          "href": "pages/log/logManage.html",
+          "icon": "fa fa-book",
+          "target": "_self"
+        }
+      ]
+    }
+  ]
+}

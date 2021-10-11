@@ -1,0 +1,160 @@
+app:
+  id: bigdata-filesystem
+## 端口
+server:
+  address: 0.0.0.0
+  port: 8080
+spring:
+  application:
+    name: bigdata-filesystem
+  # 时间格式化
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  ## 静态文件路径配置
+  mvc:
+    static-path-pattern: /**
+  resources:
+    static-locations: classpath:/static/
+  datasource:
+    # MySQL配置
+    url: jdbc:mysql://127.0.0.1:3306/temp?characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
+#    url: jdbc:mysql://1.14.61.179:3306/temp?characterEncoding=utf-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: mysql
+#    #    password: 123456kk2021
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # DM配置
+#    driver-class-name: dm.jdbc.driver.DmDriver
+#    url: jdbc:dm://127.0.0.1:5236/bigdata_filesystem?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8
+#    username: SYSDBA
+#    password: 123456
+    type: com.zaxxer.hikari.HikariDataSource
+#    initialization-mode: never
+    initialization-mode: always
+    platform: mysql
+    continue-on-error: false
+    #data-password:
+    #data-username:
+    #schema-password:
+    #schema-username:
+    sql-script-encoding: utf-8
+    separator: ;
+    schema:
+      classpath:sql/bigdata_filesystem.sql
+    data:
+      classpath:sql/data.sql
+    hikari:
+      connection-timeout: 120000
+      idle-timeout: 300000
+      auto-commit: true
+      maximum-pool-size: 2
+      max-lifetime: 1800000
+  servlet:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 1024MB
+  devtools:
+    restart:
+      #热部署生效
+      enabled: true
+      #设置重启的目录
+      additional-paths: static/**,templates/**
+  #模板引擎配置
+  freemarker:
+    #设置编码格式
+    charset: utf-8
+    #设置文件后缀
+    suffix: .ftl
+    #设置ftl文件路径
+    template-loader-path: classpath:/templates/
+    #关闭缓存，及时刷新，上线生产环境需要改为true
+    cache: false
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    default-statement-timeout: 25
+    mapUnderscoreToCamelCase: true
+  #    useGeneratedKeys: true
+  mapper-locations: classpath:mapper/*Mapper.xml
+## 分页配置
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countsql
+logging:
+  config: classpath:logback.xml
+base:
+  detail:
+    rowCount: 100
+  default:
+    login:
+      expire-time: 600000000 # 6000s
+file:
+  # 文件存储路径
+  save-path: file/root/
+  # 断点续传文件配置路径
+  conf-path: file/conf/
+  # 临时文件路径
+  tmp-path: file/tmp/
+  # pdf解析存储路径
+  pdf-parse-path: file/pdf/parse/
+  # 小文件大小 2MB = 1024 * 1024 * 2, 同时代表块大小，大文件以此分小块
+  chunk-size: 10485760 # 10MB
+  # 头像存储路径
+  avatar-path: /avatar/
+  # 文件储存路径
+  file-path: /file/
+
+rsa:
+  private-key: MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCx8mdK4Y/jzM6SPcmNoUPJWl3O7seJ\
+    MoIvTmzvET0gWOacbsBZvg4nQgS7lS0Kt3Yp4q/ZkrHWsTkMuObJWQcpxZEddoTWBuijc7BbVFi0gVHyy\
+    14SLnhg7wHGK5hPOEqhGuASg1nmKnEGhAE++Jzh3q9z2MwdUiP+btodcIhYtrSPhmnADgPqnYayEthR6q\
+    aGS90qpgDZ7mdXFqf6W9sijKbgsJGGceqHJ98rihNvBtPjrNjxLsmsZBLp3MGhEt4fy83aO1qVvbrw3K2\
+    KhUOou1s5qsdxy7Z5fiYVL0GyWE1Z7NXzuUWZlE1XV2tyYEwqHJDLfr3rjd4iL1j5KxkxAgMBAAECggEA\
+    IyPpfgIZNjUlvf9xpARqrIKp78l7of5Vcx4bqQJQfejQcaf1WEON6/a/lIObB3i/XvojG+Y6NFl/GKITA\
+    UQRhBA93gGfrdxjaJPaCc8YTV0UX8wFYbXHk+ze/tFxHIPTSQlTopRJ1ogfFdhPnq3d3UTqhQgVFt03un\
+    ENpa6pXksxdAiGw45G1Omz+1fuPIpiCEay6URr5akWDJQO42ILcFkdqCGOiWRipBzHEYGC4j0iFjpX0Jr\
+    bFyqwlyrg7VyWBPKaoKPcgtFV+cTr2aQi9Hw0H11DybxxJNxWcpybK7GGMa6TfgNcbAtvKE1k5MQ+5WgT\
+    EvEj2/5IF44iwjSBWQKBgQDvn8VRVUWm/gW7OwhL7yDVXs8d9Q5qqGiPdUksY5bp63Suu9Qu0vrGAJQGe\
+    +omf8l3CuOcYMTXH07kXU8AUtXL3YdZZ/LdqMDMhRFNEtXRSfRVpKNADS8oSleQk+9wRqq3DktS9CkoAP\
+    hHLKizjAUhELeIEUU3sNnSD4H9pMOsiwKBgQC+G5ahamfx40kXC6yPOZfM6H3UxVS0kyPlTMYYa5b0unc\
+    S+zf00i+ns1Uog8eO3PZN8eYdh4n1XAgDRaGSxujbollZ/rcoQGLJF9P4GBsezgo5YE56ji+MD8n8L8/J\
+    BxmXVvg++yegRzwu634S92JqKp/F2Vrl572oqLpdvHbcswKBgQCnHKyWeTqXKGbE2XmCw2UJiRI2mTWRq\
+    pspGSmL3HRd9IguZ+2lLhwXxEV3dCmq6cmNzLlJ0K7WPA5f8rbqydoyT+9ZqcXVUiALQe3761vUlpfgtm\
+    3neIpfteD1gkYk7hOWkFB1rLObI3oC4SFR/h+BnM/yA+Fa4mo2Nfx48NRJ2wKBgD5Kh+bIGNsXYEGe36H\
+    meyj3HRP0vLaWZ/KgX2BtEH+MAaxEiKc9n8PRbRvjYiYbnNEZbA9M9BVjXHTGAhU3++DLp39niNg1kKjX\
+    l+r46xoC5TK7rbtWj5nTKpnpiKoUG3yNULZCUU+hR8UQALVyPdsPsF6Bw9kFQA3di4NfV4slAoGAMfe/6\
+    TvFlIC+cLuZDr8YyHuBYYsfjFzXZjVWlsiyHgq2Lw8fe5inGTkHNJlqL5lwi81Q99ur9a3JL2r4cWzAcng\
+    wl0BRwgshkQvnmYD1+bgRFL1UjW1SKM4OsoqBm53C8N7D5qVcCDvfKSyfPoFkBBI+PbFP5Uo/QQ3/UG6XPGg=
+  public-key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsfJnSuGP48zOkj3JjaFDyVpdzu7HiTKCL05s7\
+    xE9IFjmnG7AWb4OJ0IEu5UtCrd2KeKv2ZKx1rE5DLjmyVkHKcWRHXaE1gboo3OwW1RYtIFR8steEi54YO\
+    8BxiuYTzhKoRrgEoNZ5ipxBoQBPvic4d6vc9jMHVIj/m7aHXCIWLa0j4ZpwA4D6p2GshLYUeqmhkvdKqY\
+    A2e5nVxan+lvbIoym4LCRhnHqhyffK4oTbwbT46zY8S7JrGQS6dzBoRLeH8vN2jtalb268NytioVDqLtb\
+    OarHccu2eX4mFS9BslhNWezV87lFmZRNV1drcmBMKhyQy369643eIi9Y+SsZMQIDAQAB
+aes:
+  pwd: qbxMmOzbXe3ogka1
+  vector: gXijhXI36S3V4oIR
+
+scheduler:
+  fixedrate:
+    pdf: 30000
+    word: 30000
+    ppt: 30000
+    excel: 30000
+tesseract:
+  datapath: D:\\BDFS\\tesseract\\tessdata
+#elasticsearch 配置：
+elasticsearch:
+  #如果是集群，用逗号隔开
+  address: localhost:9200
+  #连接超时时间
+  connect-timeout: 1000
+  #连接超时时间  
+  socket-timeout: 30000
+  connection-request-timeout: 500
+  max-connect-num: 10
+  max-connect-per-route: 10
+
+backurl: localhost:8080

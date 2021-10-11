@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>角色权限管理</title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet"/>
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body class="pear-container">
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">角色名</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="roleName" placeholder="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">权限名</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="rightName" placeholder="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-inline">
+                    <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="role-right-query">
+                        <i class="layui-icon layui-icon-search"></i>
+                        查询
+                    </button>
+                    <button type="reset" class="pear-btn pear-btn-md">
+                        <i class="layui-icon layui-icon-refresh"></i>
+                        重置
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table id="role-right-table" lay-filter="role-right-table"></table>
+    </div>
+</div>
+
+<script type="text/html" id="role-toolbar">
+    <button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
+        <i class="layui-icon layui-icon-add-1"></i>
+        新增
+    </button>
+    <button class="pear-btn pear-btn-primary pear-btn-md" lay-event="bind_unbind">
+        <i class="layui-icon layui-icon-add-1"></i>
+        绑定与解绑
+    </button>
+</script>
+
+<script type="text/html" id="role-bar">
+    <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="remove"><i
+            class="layui-icon layui-icon-delete"></i>
+    </button>
+</script>
+
+<script src="../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script src="../../lib/jquery-3.4.1/jquery-3.4.1.min.js" type="text/javascript"></script>
+<script>
+    layui.use(['table', 'form', 'constant', 'jquery', 'comn'], function () {
+        let table = layui.table;
+        let form = layui.form;
+        let $ = layui.jquery;
+        let constant = layui.constant;
+        let comn = layui.comn;
+
+        let user = comn.getUser()
+        let cols = [
+            [
+                // {title: '用户ID', field: 'userId', width: '100'},
+                {title: '角色名', field: 'roleName', width: '150'},
+                // {title: '权限ID', field: 'rightId', width: '100'},
+                {title: '权限名', field: 'rightName', width: '150'},
+                {title: '创建用户', field: 'createUser', width: '100'},
+                {title: '创建时间', field: 'createTime', width: '180'},
+                {title: '删除', toolbar: '#role-bar', width: '70'}
+            ]
+        ]
+
+        table.render({
+            elem: '#role-right-table',
+            limit: 10,
+            headers: comn.getHeaders(),
+            limits: [10, 20, 40, 60, 80, 100, 200],
+            url: constant.backurl + 'role/right/getRoleRights',
+            parseData: function (res) {
+                entity = comn.parseData(res);
+                if (entity == undefined || '' == entity || null == entity) {
+                    return {}
+                } else {
+                    return {
+                        "code": entity.code,
+                        "msg": entity.msg,
+                        "count": entity.entity.total,
+                        "data": entity.entity.list
+                    }
+                }
+            },
+
+            page: true,
+            cols: cols,
+            skin: 'line',
+            toolbar: '#role-toolbar',
+            defaultToolbar: [{
+                title: '刷新',
+                layEvent: 'refresh',
+                icon: 'layui-icon-refresh',
+            }, 'filter', 'print', 'exports']
+        });
+
+        //查询监听按钮
+        form.on('submit(role-right-query)', function (data) {
+            table.reload('role-right-table', {
+                url: constant.backurl + 'user/right/getRoleRights',
+                where: data.field,
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+            })
+            return false;
+        });
+
+        table.on('tool(role-right-table)', function (obj) {
+            if (obj.event === 'remove') {
+                window.remove(obj);
+            }
+        });
+
+        table.on('toolbar(role-right-table)', function (obj) {
+            if (obj.event === 'add') {
+                window.add();
+            } else if (obj.event === 'refresh') {
+                window.refresh();
+            } else if (obj.event === 'bind_unbind') {
+                window.bind_unbind();
+            }
+        });
+
+        window.add = function () {
+            layer.open({
+                type: 2,
+                title: '新增',
+                shade: 0.1,
+                maxmin: true,
+                area: [comn.isModile() ? '100%' : '500px', comn.isModile() ? '100%' : '400px'],
+                content: '/pages/right/role_right_add.html'
+            })
+        }
+
+        window.bind_unbind = function () {
+            layer.open({
+                type: 2,
+                title: '绑定与解绑',
+                shade: 0.1,
+                maxmin: true,
+                area: [comn.isModile() ? '100%' : '500px', comn.isModile() ? '100%' : '400px'],
+                content: '/pages/right/role_right_bind_unbind.html',
+                end: function(){
+                    window.refresh()
+                }
+            })
+        }
+
+        window.remove = function (data) {
+            var delete_index = layer.confirm("是否解绑该角色权限？", {
+                    btn: ['确认', '取消'], cancel: function () {
+                        parent.layer.close(delete_index);//关闭窗口
+                    }
+                },
+                function () {
+                    // let loading = layer.load();
+                    let myData = {"roleId": data.data.roleId, "rightId": data.data.rightId, "updateUser": user.userNum};
+                    let myJson = JSON.stringify(myData);
+                    comn.post(constant.backurl + 'role/right/unbind', myJson, null, function () {
+                        table.reload("role-right-table", {
+                            url: constant.backurl + 'role/right/getRoleRights'
+                        });
+                    }, function () {
+                        parent.layer.close(delete_index);//关闭窗口
+                    });
+                }, function () {
+                    parent.layer.close(delete_index);//关闭窗口
+                }
+            )
+        }
+
+        window.refresh = function () {
+            table.reload('role-right-table');
+        }
+    })
+
+</script>
+</body>
+</html>

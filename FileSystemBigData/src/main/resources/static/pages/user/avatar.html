@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <link rel="stylesheet" href="../../lib/layui-v2.5.5/css/layui.css" media="all">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="../../lib/layui-v2.5.5/css/layui.css" media="all">
+  <link rel="stylesheet" href="../../css/public.css" media="all">
+  <style>
+    body {
+      background-color: #ffffff;
+    }
+    .create-btn {width:288px;height:40px;background-color: #1e9fff;border-radius:16px;margin:24px auto 0;text-align:center;line-height:40px;color:#fff;font-size:14px;letter-spacing:0;cursor:pointer;border:none;}
+  </style>
+  <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+  <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+</head>
+<body>
+<form class="layui-form layui-form-pane" id="fileForm" action="">
+<div class="layui-form layuimini-form">
+  <!--    <div class="layui-form-item">-->
+  <!--        <label class="layui-form-label required">rightId</label>-->
+  <!--        <div class="layui-input-block">-->
+  <!--            <input type="text" name="rightId" lay-verify="required" lay-reqtext="权限Id不能为空" placeholder="请输入权限Id" value="" class="layui-input">-->
+  <!--            <tip>填写自己管理账号的名称。</tip>-->
+  <!--        </div>-->
+  <!--    </div>-->
+  <div class="layui-form-item">
+    <label class="layui-form-label required">父目录Id</label>
+    <div class="layui-input-block">
+      <input type="text" name="parentCatalogId" lay-verify="required" lay-reqtext="" placeholder="" value="" class="layui-input">
+
+    </div>
+  </div>
+  <!--    <div class="layui-form-item">-->
+  <!--        <label class="layui-form-label required">createUser</label>-->
+  <!--        <div class="layui-input-block">-->
+  <!--            <input type="text" name="createUser" lay-verify="required" lay-reqtext="创建者不能为空" placeholder="请输入创建者" value="" class="layui-input">-->
+  <!--        </div>-->
+  <!--    </div>-->
+  <div class="layui-form-item layui-form-text">
+    <label class="layui-form-label required">创建者</label>
+    <div class="layui-input-block">
+      <input  type="text" name="createUser" class="layui-textarea" placeholder="" class="layui-input">
+    </div>
+  </div>
+  <div class="layui-upload">
+    <button type="button" class="layui-btn" id="test1">上传文件</button>
+    <div class="layui-upload-list">
+      <img class="layui-upload-img" id="demo1">
+      <p id="demoText"></p>
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <button type="submit" class="create-btn layui-btn-normal" lay-submit lay-filter="role-add">
+        <i class="layui-icon layui-icon-ok"></i>
+        确认上传
+      </button>
+    </div>
+  </div>
+</div>
+</form>
+<script src="../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../../js/lay-config.js?v=2.0.0" charset="utf-8"></script>
+<script>
+  layui.use(['form','jquery','constant','upload'],function(){
+    let form = layui.form;
+    let $ = layui.jquery;
+    let constant = layui.constant;
+    let upload=layui.upload;
+    upload.render({
+      elem:"#test1",
+      url:constant.backurl+'file/upload/small',
+      accept:"file",
+      method:"post",
+      auto: false,        /*true为选中图片直接提交，false为不提交根据bindAction属性上的id提交*/
+      bindAction: '#role-add',
+      done:function(result){
+        console.log(result);
+      },
+      error:function(){
+        console.log("error");
+      }
+    })
+
+    form.on('submit(role-add)', function(data){
+      // console.log(data.field);
+      var formData = new FormData($( "#fileForm" )[0]);
+      console.log(formData);
+      $.ajax({
+        url:constant.backurl + 'file/upload/small',
+        // data:JSON.stringify(data.field),
+        data:formData,
+        // dataType:'json',
+        contentType: false,   //jax 中 contentType 设置为 false 是为了避免 JQuery 对其操作，从而失去分界符，而使服务器不能正常解析文件
+        processData: false,
+        // contentType:'application/json',
+        type:'post',
+        success:function(result){
+          if(result.status === 200){
+            // "第一个参数是result.msg"
+            layer.msg("上传成功",{icon:1,time:1000},function(){
+              parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+              parent.layui.table.reload("user-table");
+            });
+          }else{
+            layer.msg("上传失败",{icon:2,time:1000});
+          }
+        }
+      })
+      return false;
+    });
+  })
+</script>
+
+<script>
+</script>
+</body>
+</html>

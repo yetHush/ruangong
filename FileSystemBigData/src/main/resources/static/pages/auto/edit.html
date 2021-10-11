@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑</title>
+    <link href="../../component/pear/css/pear.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+</head>
+<body>
+<form class="layui-form" id="auto-info" lay-filter="auto-info" action="">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="main-container">
+                <div class="layui-form-item">
+                    <label class="layui-form-label required">表名</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="tableName" lay-verify="required" lay-reqtext="表名不能为空"
+                               class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label required">内容</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="content" lay-verify="required" lay-reqtext="内容不能为空"
+                               placeholder="请输入内容" value=""
+                               class="layui-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="bottom">
+    <div class="button-container">
+        <button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="auto-save">
+            <i class="layui-icon layui-icon-ok"></i>
+            提交
+        </button>
+        <!--        <button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">-->
+        <!--            <i class="layui-icon layui-icon-refresh"></i>-->
+        <!--            重置-->
+        <!--        </button>-->
+    </div>
+</div>
+<script src="../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../../js/lay-config.js?v=2.0.0" charset="utf-8"></script>
+<script>
+    let parentData = null;
+
+    window.setParentData = function (obj) {
+        parentData = JSON.parse(JSON.stringify(obj));
+    }
+    layui.use(['form', 'jquery', 'constant', 'comn'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+        let constant = layui.constant;
+        let comn = layui.comn;
+        /**
+         * 初始化表单，要加上，不然刷新部分组件可能会不加载
+         */
+        form.render();
+
+        form.val("auto-info", parentData);
+        let user = comn.getUser()
+        //监听提交
+        form.on('submit(auto-save)', function (data) {
+            data = form.val("auto-info")
+            var updateDTO = {
+                "autoId": parentData.autoId,
+                "tableName": data.tableName,
+                "content": data.content,
+                "updateUser": user.userNum,
+            }
+            comn.post(constant.backurl + 'auto/update', JSON.stringify(updateDTO), null, successFunc = function () {
+                setTimeout(function () {
+                    parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                    parent.layui.table.reload("auto-table");
+                }, 3000);
+            })
+            return false;
+        });
+
+    })
+</script>
+<script>
+</script>
+</body>
+</html>

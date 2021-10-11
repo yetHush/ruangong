@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="bigdata.filesystem.mapper.RightMapper">
+
+    <resultMap id="BaseResultMap" type="bigdata.filesystem.entity.Permission">
+        <id property="rightId" column="RIGHT_ID" jdbcType="BIGINT"/>
+        <result property="rightName" column="RIGHT_NAME" jdbcType="VARCHAR"/>
+        <result property="rightType" column="RIGHT_TYPE" jdbcType="VARCHAR"/>
+        <result property="rightUrl" column="RIGHT_URL" jdbcType="VARCHAR"/>
+        <result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP"/>
+        <result property="createUser" column="CREATE_USER" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="checkRightByName" resultType="long">
+        select count(1)
+        from PERMISSION
+        where RIGHT_NAME = #{rightName}
+    </select>
+
+    <select id="checkRightId" resultType="long">
+        SELECT count(1)
+        FROM PERMISSION
+        WHERE RIGHT_ID = #{rightId}
+    </select>
+
+    <resultMap type="bigdata.filesystem.dto.query.GetRightsResultDTO" id="getRightsResultMap" extends="BaseResultMap">
+    </resultMap>
+    <select id="getRights" resultMap="getRightsResultMap">
+        select
+        *
+        from PERMISSION
+        where 1=1
+        <if test="rightName != null and rightName !='' ">
+            and RIGHT_NAME like concat('%',#{rightName},'%')
+        </if>
+        <if test="rightType != null and rightType !='' ">
+            and RIGHT_TYPE like concat('%',#{rightType},'%')
+        </if>
+    </select>
+</mapper>
+
+
+

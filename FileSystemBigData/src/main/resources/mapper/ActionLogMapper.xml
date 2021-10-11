@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="bigdata.filesystem.mapper.ActionLogMapper">
+    <resultMap id="BaseResultMap" type="bigdata.filesystem.entity.ActionLog">
+        <id property="logId" column="LOG_ID" jdbcType="BIGINT"/>
+        <result property="logName" column="LOG_NAME" jdbcType="VARCHAR"/>
+        <result property="logType" column="LOG_TYPE" jdbcType="VARCHAR"/>
+        <result property="ipaddr" column="IPADDR" jdbcType="VARCHAR"/>
+        <result property="url" column="URL" jdbcType="VARCHAR"/>
+        <result property="browser" column="BROWSER" jdbcType="VARCHAR"/>
+        <result property="os" column="OS" jdbcType="VARCHAR"/>
+        <result property="clazz" column="CLAZZ" jdbcType="VARCHAR"/>
+        <result property="method" column="METHOD" jdbcType="VARCHAR"/>
+        <result property="message" column="MESSAGE" jdbcType="VARCHAR"/>
+        <result property="status" column="STATUS" jdbcType="TINYINT"/>
+        <result property="lineNum" column="LINE_NUM" jdbcType="TINYINT"/>
+        <result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP"/>
+        <result property="createUser" column="CREATE_USER" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap type="bigdata.filesystem.dto.query.GetLogsResultDTO" id="getLogsResultMap" extends="BaseResultMap">
+    </resultMap>
+    <select id="getLogs" resultMap="getLogsResultMap">
+        select
+        *
+        from ACTION_LOG
+        where 1=1
+        <if test="logName != null and logName !='' ">
+            and LOG_NAME like concat('%',#{logName},'%')
+        </if>
+        <if test="logType != null and logType !='' ">
+            and LOG_TYPE like concat('%',#{logType},'%')
+        </if>
+        <if test="ipaddr != null and ipaddr !='' ">
+            and IPADDR like concat('%',#{ipaddr},'%')
+        </if>
+        <if test="url != null and url !='' ">
+            and URL like concat('%',#{url},'%')
+        </if>
+        <if test="clazz != null and clazz !='' ">
+            and CLAZZ like concat('%',#{clazz},'%')
+        </if>
+        <if test="method != null and method !='' ">
+            and METHOD like concat('%',#{method},'%')
+        </if>
+        <if test="message != null and message !='' ">
+            and MESSAGE like concat('%',#{message},'%')
+        </if>
+        <if test="lineNum != null">
+            and LINE_NUM = #{lineNum}
+        </if>
+        <if test="status != null">
+            and STATUS = #{status}
+        </if>
+        <if test="fromTime != null">
+            and CREATE_TIME &gt;= date_format(#{fromTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="toTime != null">
+            and CREATE_TIME &lt;= date_format(#{toTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        ORDER BY CREATE_TIME DESC
+    </select>
+
+    <select id="getLoginNum" resultType="java.lang.Long">
+        select
+        count(1)
+        from ACTION_LOG
+        where 1=1
+        and URL = '/user/login'
+        <if test="fromTime != null">
+            and CREATE_TIME &gt;= date_format(#{fromTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="toTime != null">
+            and CREATE_TIME &lt;= date_format(#{toTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+    </select>
+
+    <select id="getSubmitNum" resultType="java.lang.Long">
+        select
+        count(1)
+        from ACTION_LOG
+        where 1=1
+        <if test="fromTime != null">
+            and CREATE_TIME &gt;= date_format(#{fromTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="toTime != null">
+            and CREATE_TIME &lt;= date_format(#{toTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+    </select>
+
+    <select id="getDownloadNum" resultType="java.lang.Long">
+        select
+        count(1)
+        from ACTION_LOG
+        where 1=1
+        and URL like concat('%', '/file/download','%')
+        <if test="fromTime != null">
+            and CREATE_TIME &gt;= date_format(#{fromTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="toTime != null">
+            and CREATE_TIME &lt;= date_format(#{toTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+    </select>
+
+    <select id="getUploadNum" resultType="java.lang.Long">
+        select
+        count(1)
+        from ACTION_LOG
+        where 1=1
+        and (URL = '/file/upload/large/file' or URL = '/file/upload/small/file')
+        <if test="fromTime != null">
+            and CREATE_TIME &gt;= date_format(#{fromTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="toTime != null">
+            and CREATE_TIME &lt;= date_format(#{toTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>角色绑定权限</title>
+    <link rel="stylesheet" href="../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link href="../../component/pear/css/pear.css" rel="stylesheet"/>
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+
+<form class="layui-form" lay-filter="role-right" action="">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="main-container">
+                <div class="layui-form-item">
+                    <label class="layui-form-label required">角色名</label>
+                    <div class="layui-input-block">
+                        <input id="choose-role" layfilter="choose-role" type="text" name="roleId" lay-verify="required"
+                               lay-reqtext="角色名不能为空" autocomplete="off"
+                               placeholder="点击选择" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label required">权限名</label>
+                    <div class="layui-input-block">
+                        <input id="choose-right" layfilter="choose-right" type="text" name="rightId"
+                               lay-verify="required"
+                               lay-reqtext="权限名不能为空" autocomplete="off"
+                               placeholder="点击选择" class="layui-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="bottom">
+    <div class="button-container">
+        <button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="role-right-add">
+            <i class="layui-icon layui-icon-ok"></i>
+            提交
+        </button>
+        <button type="reset" class="layui-btn layui-btn-primary layui-btn-sm" lay-submit="" lay-filter="reset">
+            <i class="layui-icon layui-icon-refresh"></i>
+            重置
+        </button>
+    </div>
+</div>
+
+<script src="../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script src="../../lib/jquery-3.4.1/jquery-3.4.1.min.js" type="text/javascript"></script>
+<script>
+    layui.use(['table', 'form', 'jquery', 'constant', 'comn'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+        let constant = layui.constant;
+        let table = layui.table;
+        let comn = layui.comn;
+        let user = comn.getUser()
+        $('#choose-role').focus(choose_role);
+
+        function choose_role() {
+            var index = layer.open({
+                title: '选择角色',
+                type: 2,
+                shade: 0.2,
+                maxmin: true,
+                shadeClose: true,
+                area: ['90%', '80%'],
+                content: '/pages/role/role_info.html',
+                end: function () {
+                    form.render('select');
+                }
+            });
+            $(window).on("resize", function () {
+                layer.full(index);
+            });
+        }
+
+        $('#choose-right').focus(choose_right);
+
+        function choose_right() {
+            var index = layer.open({
+                title: '选择权限',
+                type: 2,
+                shade: 0.2,
+                maxmin: true,
+                shadeClose: true,
+                area: ['90%', '80%'],
+                content: '/pages/right/right_info.html',
+                end: function () {
+                    form.render('select');
+                }
+            });
+            $(window).on("resize", function () {
+                layer.full(index);
+            });
+        }
+
+        form.on('submit(reset)', function () {
+            form.val("role-right", {
+                "roleId": null,
+                "rightId": null,
+            });
+        });
+
+        form.on('submit(role-right-add)', function (data) {
+            data.field.createUser = user.userNum;
+            let roleId = document.getElementById("choose-role").field;
+            let rightId = document.getElementById("choose-right").field;
+            data.field.roleId = roleId;
+            data.field.rightId = rightId;
+            // data.field.createTime = new Date();
+            comn.post(constant.backurl + 'role/right/bind', JSON.stringify(data.field), null, successFunc = function () {
+                setTimeout(function () {
+                    parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                    parent.layui.table.reload("role-right-table");
+                }, 3000);
+            })
+
+            return false;
+        });
+    });
+</script>
+
+</body>
+</html>

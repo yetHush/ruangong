@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="bigdata.filesystem.mapper.UserRoleMapper">
+
+    <resultMap id="BaseResultMap" type="bigdata.filesystem.entity.UserRole">
+        <id property="userId" column="USER_ID" jdbcType="BIGINT"/>
+        <id property="roleId" column="ROLE_ID" jdbcType="BIGINT"/>
+        <result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP"/>
+        <result property="createUser" column="CREATE_USER" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="checkUserRole" resultType="long">
+        SELECT count(1)
+        FROM USER_ROLE
+        where USER_ID = #{userId}
+          and ROLE_ID = #{roleId}
+    </select>
+
+    <select id="getRoleIdByUser" resultType="java.lang.Long">
+        select ROLE_ID
+        from USER_ROLE
+        where USER_ID = #{userId}
+    </select>
+
+    <delete id="deleteUserRole">
+        delete
+        from USER_ROLE
+        where USER_ID = ${userId}
+          and ROLE_ID = ${roleId}
+    </delete>
+
+    <resultMap type="bigdata.filesystem.dto.query.GetUserRolesResultDTO" id="getUserRolesResultMap">
+        <id property="userId" column="USER_ID" jdbcType="BIGINT"/>
+        <id property="roleId" column="ROLE_ID" jdbcType="BIGINT"/>
+        <result property="userNum" column="USER_NUM" jdbcType="VARCHAR"/>
+        <result property="username" column="USERNAME" jdbcType="VARCHAR"/>
+        <result property="roleName" column="ROLE_NAME" jdbcType="VARCHAR"/>
+        <result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP"/>
+        <result property="createUser" column="CREATE_USER" jdbcType="VARCHAR"/>
+    </resultMap>
+    <select id="getUserRoles" resultMap="getUserRolesResultMap">
+        select
+        ur.*,
+        u.USER_NUM, u.USERNAME, u.USER_ID,
+        r.ROLE_ID, r.ROLE_NAME
+        from USER_ROLE ur
+        left join DM_USER u on ur.USER_ID=u.USER_ID
+        left join ROLE r on ur.ROLE_ID=r.ROLE_ID
+        where 1=1
+        <if test="roleName != null and roleName !='' ">
+            and ROLE_NAME like concat('%',#{roleName},'%')
+        </if>
+        <if test="username != null and username !='' ">
+            and USERNAME like concat('%',#{username},'%')
+        </if>
+    </select>
+
+
+    <select id="getUserRolesByUserId" resultMap="BaseResultMap">
+        select
+        ur.*
+        from USER_ROLE ur
+        left join ROLE r on ur.ROLE_ID=r.ROLE_ID
+        where 1=1
+        <if test="userId != null">
+            and ur.USER_ID = #{userId}
+        </if>
+        <if test="status != null">
+            and r.status = #{status}
+        </if>
+    </select>
+</mapper>

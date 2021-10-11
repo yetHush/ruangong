@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="../../component/pear/css/pear.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../css/public.css" media="all">
+</head>
+<body>
+<form class="layui-form" lay-filter="user-info" action="">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="main-container">
+                <div class="layui-form-item">
+                    <label class="layui-form-label required">用户名</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="username" lay-verify="required" lay-reqtext="用户名不能为空"
+                               placeholder="请输入用户名" value=""
+                               class="layui-input">
+                    </div>
+                </div>
+                <!--  <div class="layui-form-item">-->
+                <!--    <label class="layui-form-label required">userId</label>-->
+                <!--    <div class="layui-input-block">-->
+                <!--      <input type="text" name="userId" lay-verify="required" lay-reqtext="用户id不能为空" placeholder="请输入用户id" value="" class="layui-input">-->
+                <!--    </div>-->
+                <!--  </div>-->
+                <div class="layui-form-item">
+                    <label class="layui-form-label required">工号</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="userNum" lay-verify="required" lay-reqtext="用户号码不能为空"
+                               placeholder="请输入用户号码"
+                               value="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label required">密码</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="userPwd" lay-verify="required" lay-reqtext="密码不能为空" placeholder="请输入密码"
+                               value="" autocomplete="off"
+                               class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item ">
+                    <label class="layui-form-label">邮箱</label>
+                    <div class="layui-input-block">
+                        <input type="email" name="email" placeholder="请输入邮箱" value="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item ">
+                    <label class="layui-form-label">性别</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="sex" value="1" title="男">
+                        <input type="radio" name="sex" value="2" title="女">
+                    </div>
+                </div>
+                <div class="layui-form-item ">
+                    <label class="layui-form-label">手机号</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="phoneNum" placeholder="请输入手机号" value="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item ">
+                    <label class="layui-form-label">备注</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="remark" placeholder="请输入备注" value="" class="layui-input">
+                    </div>
+                </div>
+                <!--  <div class="layui-form-item">-->
+                <!--    <label class="layui-form-label required">createUser</label>-->
+                <!--    <div class="layui-input-block">-->
+                <!--      <input type="text" name="createUser" lay-verify="required" lay-reqtext="创建者不能为空" placeholder="请输入创建者" value="" class="layui-input">-->
+                <!--    </div>-->
+                <!--  </div>-->
+                <!--  <div class="layui-form-item">-->
+                <!--    <label class="layui-form-label required">createTime</label>-->
+                <!--    <div class="layui-input-block">-->
+                <!--      <input type="text" name="createTime" lay-verify="required" lay-reqtext="创建时间不能为空" placeholder="请输入创建时间" value="" class="layui-input">-->
+                <!--    </div>-->
+                <!--  </div>-->
+            </div>
+        </div>
+    </div>
+</form>
+<div class="bottom">
+    <div class="button-container">
+        <button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="user-save">
+            <i class="layui-icon layui-icon-ok"></i>
+            提交
+        </button>
+        <button type="reset" class="layui-btn layui-btn-primary layui-btn-sm" lay-submit="" lay-filter="reset">
+            <i class="layui-icon layui-icon-refresh"></i>
+            重置
+        </button>
+    </div>
+</div>
+<script src="../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<!--<script src="../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>-->
+<script>
+    layui.use(['form', 'jquery', 'constant', 'jsencrypt', 'comn'], function () {
+        let form = layui.form,
+            layer = layui.layer,
+            $ = layui.jquery,
+            constant = layui.constant,
+            jsencrypt = layui.jsencrypt,
+            comn = layui.comn;
+        // console.log("登录的用户");
+        // console.log(layui.sessionData(constant.tablename).user.userNum);
+        let user = comn.getUser()
+        form.on('submit(reset)', function () {
+            form.val("user-info", {
+                "userPwd": null,
+                // "userId": data.field.userId,
+                "userNum": null,
+                "username": null,
+                "remark": null,
+                "status": null,
+                "email": null,
+                "sex": null,
+                "phoneNum": null,
+            });
+        });
+
+        //监听提交
+        form.on('submit(user-save)', function () {
+            data = form.val("user-info")
+            var createDTO = {
+                "userPwd": data.userPwd,
+                // "userId": data.field.userId,
+                "userNum": data.userNum,
+                "username": data.username,
+                "remark": data.remark,
+                "createUser": user.userNum,
+                "status": data.status,
+                "email": data.email,
+                "sex": data.sex,
+                "phoneNum": data.phoneNum,
+            }
+            var encrypt = new JSEncrypt();
+            encrypt.setPublicKey(constant.publickey);
+
+            var encrypted = encrypt.encrypt(JSON.stringify(createDTO));
+            comn.post_param(constant.backurl + 'user/noavatar/create', {"userCreateDTO": encrypted}, null, successFunc = function () {
+                setTimeout(function () {
+                    parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                    parent.layui.table.reload("user-table");
+                }, 3000);
+            })
+
+            // $.ajax({
+            //     url: 'http://localhost:8080/user/noavatar/create',
+            //     data: {"userCreateDTO": encrypted},
+            //     dataType: 'json',
+            //     //TODO:这里用json格式会报错！
+            //     contentType: 'application/x-www-form-urlencoded;charset=UTF-8',
+            //     type: 'post',
+            //     success: function (result) {
+            //         // result.success
+            //         console.log(result);
+            //         if (result.status === 200) {
+            //             layer.msg("创建成功", {icon: 1, time: 1000}, function () {
+            //                 parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+            //                 parent.layui.table.reload("user-table");
+            //             });
+            //         } else {
+            //             layer.msg("创建失败", {icon: 2, time: 1000});
+            //         }
+            //     }
+            // })
+            return false;
+
+            /*
+            data=data.field;
+            if (data.userName === '') {
+              layer.msg('用户名不能为空');
+              return false;
+            }
+            if (data.pwd === '') {
+              layer.msg('密码不能为空');
+              return false;
+            }
+            var createDTO = {
+              userId: data.userId,
+              userPwd: data.userPwd,
+              userName: data.userName,
+              createUser:data.createUser,
+              createTime:data.createTime,
+              userRoleBind:data.userRoleBind
+            }
+            comn.post(constant.backurl + '/user/add', createDTO, 'userManage2.html',
+                    comn.login, function(){
+                      $('.create-btn').text('创建用户').attr("disabled",false);
+                    });
+            // setTimeout(function(){
+            //     $('.login-btn').text('立即登录').attr("disabled",false);
+            // },3000);
+            var index = layer.alert(JSON.stringify(data.field), {
+              title: '最终的提交信息'
+            }, function () {
+
+              // 关闭弹出层
+              layer.close(index);
+
+              var iframeIndex = parent.layer.getFrameIndex(window.name);
+              parent.layer.close(iframeIndex);
+            return false;
+
+
+
+            });
+
+            return false;
+          });
+      */
+        });
+
+    })
+</script>
+</body>
+</html>

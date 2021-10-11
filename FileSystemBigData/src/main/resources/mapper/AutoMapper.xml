@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="bigdata.filesystem.mapper.AutoMapper">
+    <resultMap id="BaseResultMap" type="bigdata.filesystem.entity.Auto">
+        <id property="autoId" column="AUTO_ID" jdbcType="BIGINT"/>
+        <result property="tableName" column="TABLE_NAME" jdbcType="VARCHAR"/>
+        <result property="content" column="CONTENT" jdbcType="VARCHAR"/>
+        <result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP"/>
+        <result property="createUser" column="CREATE_USER" jdbcType="VARCHAR"/>
+        <result property="updateTime" column="UPDATE_TIME" jdbcType="TIMESTAMP"/>
+        <result property="updateUser" column="UPDATE_USER" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap type="bigdata.filesystem.dto.query.GetAutosResultDTO" id="getAutosResultMap" extends="BaseResultMap">
+    </resultMap>
+    <select id="getAutos" resultMap="getAutosResultMap">
+        select
+        *
+        from AUTO
+        where 1=1
+        <if test="tableName != null and tableName !='' ">
+            and TABLE_NAME = #{tableName}
+        </if>
+        <if test="fromTime != null">
+            and CREATE_TIME &gt;= date_format(#{fromTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="toTime != null">
+            and CREATE_TIME &lt;= date_format(#{toTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        ORDER BY CREATE_TIME DESC
+    </select>
+
+    <select id="getAutosByTableName" resultMap="BaseResultMap">
+        select
+        *
+        from AUTO
+        where 1=1
+        <if test="tableName != null and tableName !='' ">
+            and TABLE_NAME = #{tableName}
+        </if>
+    </select>
+
+</mapper>

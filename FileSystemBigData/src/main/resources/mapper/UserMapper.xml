@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="bigdata.filesystem.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="bigdata.filesystem.entity.DmUser">
+        <id property="userId" column="USER_ID" jdbcType="BIGINT"/>
+        <result property="userNum" column="USER_NUM" jdbcType="VARCHAR"/>
+        <result property="username" column="USERNAME" jdbcType="VARCHAR"/>
+        <result property="userPwd" column="USER_PWD" jdbcType="VARCHAR"/>
+        <result property="pwdSalt" column="PWD_SALT" jdbcType="VARCHAR"/>
+        <result property="sex" column="SEX" jdbcType="TINYINT"/>
+        <result property="email" column="EMAIL" jdbcType="VARCHAR"/>
+        <result property="phoneNum" column="PHONE_NUM" jdbcType="VARCHAR"/>
+        <result property="remark" column="REMARK" jdbcType="VARCHAR"/>
+        <result property="avatarPath" column="AVATAR_PATH" jdbcType="VARCHAR"/>
+        <result property="status" column="STATUS" jdbcType="TINYINT"/>
+        <result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP"/>
+        <result property="createUser" column="CREATE_USER" jdbcType="VARCHAR"/>
+        <result property="updateTime" column="UPDATE_TIME" jdbcType="TIMESTAMP"/>
+        <result property="updateUser" column="UPDATE_USER" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="getNumByUserNum" resultType="long">
+        SELECT count(1)
+        FROM DM_USER
+        WHERE USER_NUM = #{userNum}
+    </select>
+    <select id="getNumByUserId" resultType="long">
+        SELECT count(1)
+        FROM DM_USER
+        WHERE USER_ID = #{userId}
+    </select>
+
+    <select id="getUserByUserNum" resultMap="BaseResultMap">
+        select *
+        from DM_USER
+        where USER_NUM = #{userNum} limit 1
+    </select>
+
+    <select id="getUserByUserId" resultMap="BaseResultMap">
+        select *
+        from DM_USER
+        where USER_ID = #{userId}
+    </select>
+
+    <select id="getUserIdByUserNum" resultType="Long">
+        select USER_ID
+        from DM_USER
+        where USER_NUM = #{userNum}
+    </select>
+
+    <select id="checkUserId" resultType="long">
+        SELECT count(1)
+        FROM DM_USER
+        WHERE USER_ID = #{userId}
+    </select>
+
+    <resultMap type="bigdata.filesystem.dto.query.GetUsersResultDTO" id="getUsersResultMap">
+        <id property="userId" column="USER_ID" jdbcType="BIGINT"/>
+        <result property="userNum" column="USER_NUM" jdbcType="VARCHAR"/>
+        <result property="username" column="USERNAME" jdbcType="VARCHAR"/>
+        <result property="sex" column="SEX" jdbcType="TINYINT"/>
+        <result property="email" column="EMAIL" jdbcType="VARCHAR"/>
+        <result property="phoneNum" column="PHONE_NUM" jdbcType="VARCHAR"/>
+        <result property="remark" column="REMARK" jdbcType="VARCHAR"/>
+        <result property="avatarPath" column="AVATAR_PATH" jdbcType="VARCHAR"/>
+        <result property="status" column="STATUS" jdbcType="TINYINT"/>
+        <result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP"/>
+        <result property="createUser" column="CREATE_USER" jdbcType="VARCHAR"/>
+        <result property="updateTime" column="UPDATE_TIME" jdbcType="TIMESTAMP"/>
+        <result property="updateUser" column="UPDATE_USER" jdbcType="VARCHAR"/>
+    </resultMap>
+    <select id="getUsers" resultMap="getUsersResultMap">
+        select
+        *
+        from DM_USER
+        where 1=1
+        <if test="userNum != null and userNum !='' ">
+            and USER_NUM like concat('%',#{userNum},'%')
+        </if>
+        <if test="username != null and username !='' ">
+            and USERNAME like concat('%',#{username},'%')
+        </if>
+        <if test="sex != null">
+            and SEX = #{sex}
+        </if>
+        <if test="email != null and email !='' ">
+            and EMAIL like concat('%',#{email},'%')
+        </if>
+        <if test="phoneNum != null and phoneNum !='' ">
+            and PHONE_NUM like concat('%',#{phoneNum},'%')
+        </if>
+        <if test="status != null">
+            and STATUS = #{status}
+        </if>
+    </select>
+
+    <select id="getNumByStatus" resultType="java.lang.Long">
+        SELECT count(1)
+        FROM DM_USER
+        WHERE STATUS = #{status}
+    </select>
+</mapper>

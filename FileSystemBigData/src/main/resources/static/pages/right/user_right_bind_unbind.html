@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户绑定权限</title>
+    <link rel="stylesheet" href="../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link href="../../component/pear/css/pear.css" rel="stylesheet"/>
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<form class="layui-form" lay-filter="user-right" action="">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="main-container">
+                <div class="layui-form-item">
+                    <label class="layui-form-label required">用户名</label>
+                    <div class="layui-input-block">
+                        <input id="choose-user" layfilter="choose-user" type="text" name="userId" lay-verify="required"
+                               lay-reqtext="用户名不能为空" autocomplete="off" placeholder="点击选择" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">权限名</label>
+                    <div class="layui-input-block" id="checkBox">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script src="../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script src="../../lib/jquery-3.4.1/jquery-3.4.1.min.js" type="text/javascript"></script>
+<script>
+    layui.use(['table', 'form', 'jquery', 'constant', 'dropdown', 'comn', 'checkbox'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+        let constant = layui.constant;
+        let table = layui.table;
+        let dropdown = layui.dropdown;
+        let comn = layui.comn;
+        let checkbox = layui.checkbox;
+        let user = comn.getUser()
+        $('#choose-user').focus(choose_user);
+
+        function choose_user(data) {
+            var index = layer.open({
+                title: '选择用户',
+                type: 2,
+                shade: 0.2,
+                maxmin: true,
+                shadeClose: true,
+                area: ['90%', '80%'],
+                content: '/pages/user/user_info.html',
+                end: function () {
+                    form.render('select');
+                }
+            });
+        }
+
+        $('#choose-user').change(function (data) {
+            let userId = document.getElementById("choose-user").field;
+            let dto = {
+                'userId': userId
+            }
+            comn.post(constant.backurl + 'user/right/getUserRights4CheckBox', JSON.stringify(dto), null, function (entity) {
+                checkbox({
+                    elem: "#checkBox"
+                    , showDel: false
+                    , showType: false
+                    , clear: true
+                    , nodes: entity
+                    , click: function (node) {
+                        if (node.on) {
+                            window.bind(node.rightId);
+                        } else {
+                            window.unbind(node.rightId);
+                        }
+                    }
+                    , del: function (node) {
+                        console.log("删除", node);
+                        return true;
+                    }
+                });
+            })
+        });
+
+        $(window).on("resize", function () {
+            layer.full(index);
+        })
+
+        //监听提交
+        window.bind = function (rightId) {
+            let userId = document.getElementById("choose-user").field;
+            let dto = {
+                'createUser': user.userNum,
+                'userId': userId,
+                'rightId': rightId
+            }
+            // data.field.createTime = new Date();
+            comn.post(constant.backurl + 'user/right/bind', JSON.stringify(dto))
+
+            return false;
+        }
+        window.unbind = function (rightId) {
+            let userId = document.getElementById("choose-user").field;
+            let dto = {
+                'createUser': user.userNum,
+                'userId': userId,
+                'rightId': rightId
+            }
+            // data.field.createTime = new Date();
+            comn.post(constant.backurl + 'user/right/unbind', JSON.stringify(dto))
+            return false;
+        }
+
+    })
+</script>
+
+</body>
+</html>
